@@ -7,11 +7,11 @@
 #include "super.h"
 #include "drive.h"
 #include "dir.h"
-#include "ifile/ifile.h"
+#include "ifile.h"
 
 #define CURRENT_VOLUME 0U
 
-static char CURRENT_DIRECTORY[256] = '/';
+static char CURRENT_DIRECTORY[256];
 
 /* ------------------------------
    command list
@@ -313,10 +313,25 @@ static void cd(struct _cmd *c) {
 
 }
 static void ls(struct _cmd *c) {
-    unsigned int inumber;
-    int status;
+    unsigned int current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
+    file_desc_t *fd;
+    struct entry_s entry;
+    unsigned int ientry = 0; /* the entry index */
+
+    /* open ifile */
+    open_ifile(fd, current_dir_inumber);
 
 
+    /* seek to begin of dir */
+    seek2_ifile(fd, 0);
+
+    /* look after the right entry */
+    while (read_ifile (fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
+        printf("%d\t%s\n", entry.ent_inumber, entry.ent_basename);
+        ientry++;
+    }
+
+   // printf("F")
 
 }
 static void cat(struct _cmd *c) {
