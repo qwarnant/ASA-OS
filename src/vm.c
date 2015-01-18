@@ -298,6 +298,7 @@ static void cd(struct _cmd *c) {
 
 	/* look after the right entry */
 	while (read_ifile(fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
+		printf("entry : %d\n", entry.ent_inumber);
 		if (entry.ent_inumber && !strcmp(entry.ent_basename, pathname)) {
 			findEntry = TRUE;
 			break;
