@@ -279,7 +279,7 @@ static void dump(unsigned char *buffer, unsigned int buffer_size,
 
 static void cd(struct _cmd *c) {
 	unsigned int current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
-	file_desc_t *fd = NULL;
+	file_desc_t fd;
 	int ientry = 0, inumber = 0; /* the entry index */
 	struct entry_s entry;
 	bool_t findEntry = FALSE;
@@ -289,15 +289,15 @@ static void cd(struct _cmd *c) {
 	(void) scanf("%s", pathname);
 
 	/* open ifile */
-	status = open_ifile(fd, current_dir_inumber);
+	status = open_ifile(&fd, current_dir_inumber);
 	ffatal(!status, "erreur ouverture fichier %d", inumber);
 
 
 	/* seek to begin of dir */
-	seek2_ifile(fd, 0);
+	seek2_ifile(&fd, 0);
 
 	/* look after the right entry */
-	while (read_ifile(fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
+	while (read_ifile(&fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
 		printf("entry : %d\n", entry.ent_inumber);
 		if (entry.ent_inumber && !strcmp(entry.ent_basename, pathname)) {
 			findEntry = TRUE;
@@ -324,20 +324,22 @@ static void cd(struct _cmd *c) {
 }
 static void ls(struct _cmd *c) {
 	unsigned int current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
-	file_desc_t *fd = NULL;
+	file_desc_t fd;
 	struct entry_s entry;
 	unsigned int ientry = 0, inumber = 0; /* the entry index */
 	int status;
 
+	printf("Current directory : %s\n", CURRENT_DIRECTORY);
+
 	/* open ifile */
-	status = open_ifile(fd, current_dir_inumber);
+
+	status = open_ifile(&fd, current_dir_inumber);
 	ffatal(!status, "erreur ouverture fichier %d", inumber);
 
 	/* seek to begin of dir */
-	seek2_ifile(fd, 0);
-	printf("Current dir : %s\n", CURRENT_DIRECTORY);
+	seek2_ifile(&fd, 0);
 	/* look after the right entry */
-	while (read_ifile(fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
+	while (read_ifile(&fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
 		printf("%d\t%s\n", entry.ent_inumber, entry.ent_basename);
 		ientry++;
 	}
@@ -396,6 +398,7 @@ int main(int argc, char **argv) {
 	init_master();
 	check_disk();
 	load_mbr();
+	strcpy(CURRENT_DIRECTORY, "/");
 
 	/* dialog with user */
 	loop();
