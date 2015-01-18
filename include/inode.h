@@ -37,6 +37,8 @@ struct inode_s {
 
 void read_inode (unsigned int inumber, struct inode_s *inode);
 void write_inode (unsigned int inumber, struct inode_s *inode);
+unsigned int create_inode(enum file_type_e type);
+unsigned int delete_inode(unsigned int inumber );
 
 /* return the bloc index on the volume of a given bloc index in a
    file.  

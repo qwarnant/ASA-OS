@@ -35,8 +35,13 @@ struct mbr_descr_s mbr;
 
 /* return RETURN_FAILURE in case of a non preexisting mbr */
 int load_mbr();
-
 void save_mbr();
+
+int add_vol(unsigned int c, unsigned int s, unsigned int size);
+int rmvol(unsigned int i);
+int check_vol(unsigned int vol);
+void display_mbr();
+void check_struc_mbr();
 
 char char_of_vol_type(enum vol_type_e);
 enum vol_type_e vol_type_of_char(char);

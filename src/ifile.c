@@ -12,9 +12,9 @@
 #include <stdio.h>
 #include <memory.h>
 
-#include "include/tools.h"
+#include "tools.h"
 #include "ifile.h"
-
+#include "inode.h"
 #include "super.h"
 #include "mbr.h"
 #include "drive.h"

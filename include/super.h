@@ -26,6 +26,8 @@ unsigned int current_volume;
 void init_super(unsigned int vol);
 void display_super(unsigned int vol);
 
+void display_filesystem();
+
 /* return RETURN_FAILURE if the super bloc was not valid */
 int load_super(unsigned int vol);
 

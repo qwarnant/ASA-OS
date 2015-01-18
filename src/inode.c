@@ -129,7 +129,7 @@ unsigned int create_inode(enum file_type_e type)
     return inumber;
 }
 
-int delete_inode(unsigned int inumber)
+unsigned int delete_inode(unsigned int inumber)
 {
     unsigned int i;
     unsigned int blocs[NNBPB],buf[NNBPB];
