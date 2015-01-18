@@ -29,7 +29,7 @@ BINARIES= $(addprefix $(BINDIR)/,$(BIN))
 OBJECTS = $(addprefix $(ODIR)/,\
 		inode.o drive.o mbr.o super.o tools.o ifile.o dir.o)
 
-all :   $(OBJ) $(BINARIES) ifile
+all :   $(OBJ) $(BINARIES)
 
 
 ###------------------------------

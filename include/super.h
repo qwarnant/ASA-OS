@@ -20,7 +20,7 @@ struct super_s {
     unsigned int super_first_free;
 };
 
-extern struct super_s super;
+struct super_s super;
 unsigned int current_volume; 
 
 void init_super(unsigned int vol);

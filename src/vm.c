@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <tools.h>
 #include "mbr.h"
 #include "super.h"
 #include "drive.h"
@@ -314,13 +315,14 @@ static void cd(struct _cmd *c) {
 }
 static void ls(struct _cmd *c) {
     unsigned int current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
-    file_desc_t *fd;
+    file_desc_t *fd = NULL;
     struct entry_s entry;
-    unsigned int ientry = 0; /* the entry index */
+    unsigned int ientry = 0, inumber = 0; /* the entry index */
+    int status;
 
     /* open ifile */
-    open_ifile(fd, current_dir_inumber);
-
+    status = open_ifile(fd, current_dir_inumber);
+    ffatal(!status, "erreur ouverture fichier %d", inumber);
 
     /* seek to begin of dir */
     seek2_ifile(fd, 0);
@@ -331,18 +333,30 @@ static void ls(struct _cmd *c) {
         ientry++;
     }
 
-   // printf("F")
-
+    printf("Number of entry read : %d\n", ientry);
 }
 static void cat(struct _cmd *c) {
-    unsigned int inumber;
-    int status;
+    file_desc_t fd;
+    int status, car;
+    unsigned inumber;
+    char pathname[ENTRYMAXLENGTH];
 
+    (void)scanf("%s",pathname);
+
+    inumber = inumber_of_path(pathname);
+
+    status = open_ifile(&fd, inumber);
+    ffatal(!status, "erreur ouverture fichier %d", inumber);
+
+    /*printf("fd_pos : %i  fd_size : %i\n",fd.fds_pos, fd.fds_size);*/
+    while((car=readc_ifile(&fd)) != READ_EOF)
+        putchar(car);
+
+    close_ifile(&fd);
 }
 
 static void mkdir(struct _cmd *c) {
     unsigned int inumber, current_dir_inumber;
-    int status;
     char dirname[ENTRYMAXLENGTH];
 
     (void)scanf("%s",dirname);
@@ -356,8 +370,7 @@ static void mkdir(struct _cmd *c) {
 }
 
 static void rmdir(struct _cmd *c) {
-    unsigned int inumber, current_dir_inumber;
-    int status;
+    unsigned int current_dir_inumber;
     char dirname[ENTRYMAXLENGTH];
 
     (void)scanf("%s",dirname);
@@ -365,7 +378,7 @@ static void rmdir(struct _cmd *c) {
     current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
 
     if(!del_entry(current_dir_inumber, dirname)) {
-    	fprintf(stderr, "Error add entry\n");
+    	fprintf(stderr, "Error delete entry\n");
     }
 }
 

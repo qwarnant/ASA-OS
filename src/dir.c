@@ -86,7 +86,7 @@ add_entry(unsigned int idir, unsigned int inumber, const char *basename)
 	return RETURN_FAILURE;
 
     /* open the dir */
-    iopen_ifile(fd, idir, &inode);
+    open_ifile(fd, idir);
 
     /* the new entry position in the file */
     ientry = new_entry(fd);
@@ -126,7 +126,7 @@ del_entry(unsigned int idir, const char *basename)
 	return RETURN_FAILURE;
 
     /* open the dir */
-    iopen_ifile(fd, idir, &inode);
+    open_ifile(fd, idir);
 
     /* the entry position in the file */
     status = find_entry(fd, basename);
@@ -174,7 +174,7 @@ inumber_of_basename(unsigned int idir, const char *basename)
 	return 0;
 
     /* open the dir */
-    iopen_ifile(fd, idir, &inode);
+    open_ifile(fd, idir);
 
     /* the entry position in the file */
     status = find_entry(fd, basename);

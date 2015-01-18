@@ -27,4 +27,7 @@ int fatal(int assert, const char *fname, const char *fmt, ...);
 /* not yet */
 #define NYI() ffatal(FALSE, "Not Yet Implemented")
 
+#define max(a,b) (a>=b?a:b)
+#define min(a,b) (a<=b?a:b)
+
 #endif
