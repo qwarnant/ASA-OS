@@ -163,12 +163,13 @@ static void mknfs(struct _cmd *c) {
 		}
 
 		CURRENT_DIRECTORY[0] = '/';
-		int inumber = create_ifile(directory);
-		int current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
+		unsigned inumber = create_ifile(directory);
+		super.super_root = inumber;
+		/*unsigned current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
 
 		if (!add_entry(current_dir_inumber, inumber, CURRENT_DIRECTORY)) {
 			fprintf(stderr, "Error add root dir\n");
-		}
+		}*/
 	} else
 		printf("Impossible de creer un systeme de fichier pour"
 				" la partition %u.\n", current_vol);
@@ -335,7 +336,7 @@ static void ls(struct _cmd *c) {
 
 	status = open_ifile(&fd, current_dir_inumber);
 	ffatal(!status, "erreur ouverture fichier %d", inumber);
-
+	printf("%d %d\n", fd.fds_inumber, fd.fds_size);
 	/* seek to begin of dir */
 	seek2_ifile(&fd, 0);
 	/* look after the right entry */
@@ -375,7 +376,7 @@ static void mkdir(struct _cmd *c) {
 	inumber = create_ifile(directory);
 	current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
 
-	if (!add_entry(current_dir_inumber, inumber, dirname)) {
+	if (add_entry(current_dir_inumber, inumber, dirname) == RETURN_FAILURE) {
 		fprintf(stderr, "Error add entry\n");
 	}
 }
@@ -388,7 +389,7 @@ static void rmdir(struct _cmd *c) {
 
 	current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
 
-	if (!del_entry(current_dir_inumber, dirname)) {
+	if (del_entry(current_dir_inumber, dirname)) {
 		fprintf(stderr, "Error delete entry\n");
 	}
 }

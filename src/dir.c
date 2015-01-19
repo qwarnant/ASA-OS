@@ -82,9 +82,9 @@ add_entry(unsigned int idir, unsigned int inumber, const char *basename)
 
     /* a directory inode? */
     read_inode(idir, &inode);
-    if (inode.ind_type != directory)
-	return RETURN_FAILURE;
-
+    if (inode.ind_type != directory) {
+        return RETURN_FAILURE;
+    }
     /* open the dir */
     open_ifile(fd, idir);
 
@@ -104,6 +104,7 @@ add_entry(unsigned int idir, unsigned int inumber, const char *basename)
 
     /* done */
     close_ifile(fd); /* even in case of write failure */
+
 
     if (nbyte == sizeof(struct entry_s))
 	return RETURN_SUCCESS;
