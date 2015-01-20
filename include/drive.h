@@ -2,8 +2,8 @@
 #define DRIVE_H
 
 #define SECTOR_SIZE 512
-#define MAX_SECTOR 16
-#define MAX_CYLINDER 16
+#define MAX_SECTOR 32
+#define MAX_CYLINDER 1024
 
 void check_disk();
 unsigned int check_cs(unsigned int c, unsigned int s);
