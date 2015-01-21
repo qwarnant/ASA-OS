@@ -1,6 +1,6 @@
 CC	= gcc
 LINK 	= gcc
-CFLAGS  = -pipe -m32 -Wall -Wextra -ansi -pedantic -std=iso9899:1999 -g -W -fPIE 
+CFLAGS  = -m32 -Wall -g 
 INCPATH	= -I. -I$(IDIR)
 LDFLAGS = -m32
 LIBS	= -lhardware -lm
@@ -10,6 +10,8 @@ BIN	= dmps frmt mkvol dvol rmvol vm mknfs dfs test
 BINIF	= if_cfile if_nfile if_pfile if_dfile
 
 SRCDIR	= src
+DRIVEDIR = drive
+CTXDIR = context
 IDIR 	= include
 ODIR	= obj
 LIBDIR 	= lib
@@ -27,7 +29,7 @@ DEPS 	= $(wildcard $(IDIR)/*.h)
 
 BINARIES= $(addprefix $(BINDIR)/,$(BIN))
 OBJECTS = $(addprefix $(ODIR)/,\
-		inode.o drive.o mbr.o super.o tools.o ifile.o dir.o)
+		inode.o drive.o mbr.o super.o tools.o ifile.o dir.o hw.o yield.o)
 
 all :   $(OBJ) $(BINARIES)
 
@@ -49,8 +51,10 @@ $(BINDIR)/vm	: $(ODIR)/vm.o $(OBJECTS)
 $(BINDIR)/% : $(ODIR)/%.o
 	$(CC) -o $@ $^ -L$(LIBDIR) $(LDFLAGS) $(LIBS)
 
+$(ODIR)/%.o: $(SRCDIR)/$(CTXDIR)/%.c $(DEPS)
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
 
-$(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS)
+$(ODIR)/%.o: $(SRCDIR)/$(DRIVEDIR)/%.c $(DEPS)
 	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
 
 
@@ -62,7 +66,7 @@ $(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS)
 clean:
 	rm -rf $(OBJ)	
 mrproper:
-	rm -rf $(OBJ) $(OBJECTSIF) rm $(BINARIES) $(BINARIESIF) $(BINDIR)/vdiskA.bin $(BINDIR)/vdiskB.bin
+	rm -rf $(OBJ) $(OBJECTSIF) rm $(BINARIES) $(BINARIESIF) vdiskA.bin vdiskB.bin
 realclean: clean 
-	$(RM) $(BINDIR)/vdiskA.bin $(BINDIR)/vdiskB.bin
+	$(RM) vdiskA.bin vdiskB.bin
 

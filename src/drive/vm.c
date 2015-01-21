@@ -165,11 +165,8 @@ static void mknfs(struct _cmd *c) {
 		CURRENT_DIRECTORY[0] = '/';
 		unsigned inumber = create_ifile(directory);
 		super.super_root = inumber;
-		/*unsigned current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
+		save_super();
 
-		if (!add_entry(current_dir_inumber, inumber, CURRENT_DIRECTORY)) {
-			fprintf(stderr, "Error add root dir\n");
-		}*/
 	} else
 		printf("Impossible de creer un systeme de fichier pour"
 				" la partition %u.\n", current_vol);
@@ -300,7 +297,7 @@ static void cd(struct _cmd *c) {
 	/* look after the right entry */
 	while (read_ifile(&fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
 		printf("entry : %d\n", entry.ent_inumber);
-		if (entry.ent_inumber && !strcmp(entry.ent_basename, pathname)) {
+		if (entry.ent_inumber && strcmp(entry.ent_basename, pathname) == 0) {
 			findEntry = TRUE;
 			break;
 		}
@@ -309,18 +306,10 @@ static void cd(struct _cmd *c) {
 
 	if (findEntry == FALSE) {
 		fprintf(stderr, "Error no file or directory for : %s\n", pathname);
-	} else {
-		//set current dir
-		//CURRENT_DIRECTORY += pathname;
-		char temp[256];
-		strcat(temp, CURRENT_DIRECTORY);
-		strcat(temp, "/");
-		strcat(temp, pathname);
-		strcat(temp, "/");
-
-		strcpy(CURRENT_DIRECTORY, temp);
-
+		return;
 	}
+
+	strcpy(CURRENT_DIRECTORY, pathname);
 
 }
 static void ls(struct _cmd *c) {
@@ -334,14 +323,16 @@ static void ls(struct _cmd *c) {
 
 	/* open ifile */
 
+
 	status = open_ifile(&fd, current_dir_inumber);
 	ffatal(!status, "erreur ouverture fichier %d", inumber);
-	printf("%d %d\n", fd.fds_inumber, fd.fds_size);
+
+	printf("i: %d s: %d\n", fd.fds_inumber, fd.fds_size);
 	/* seek to begin of dir */
 	seek2_ifile(&fd, 0);
 	/* look after the right entry */
 	while (read_ifile(&fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
-		printf("%d\t%s\n", entry.ent_inumber, entry.ent_basename);
+		printf("i :%d\t n: %s\n", entry.ent_inumber, entry.ent_basename);
 		ientry++;
 	}
 
@@ -382,15 +373,22 @@ static void mkdir(struct _cmd *c) {
 }
 
 static void rmdir(struct _cmd *c) {
-	unsigned int current_dir_inumber;
+	unsigned int current_dir_inumber, inumber;
 	char dirname[ENTRYMAXLENGTH];
 
 	(void) scanf("%s", dirname);
 
+
 	current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
 
-	if (del_entry(current_dir_inumber, dirname)) {
+	inumber = inumber_of_path(dirname);
+
+	if (del_entry(current_dir_inumber, dirname) == RETURN_FAILURE) {
 		fprintf(stderr, "Error delete entry\n");
+	}
+
+	if(delete_ifile(inumber) == RETURN_FAILURE) {
+		fprintf(stderr, "Error delete file\n");
 	}
 }
 
@@ -400,7 +398,7 @@ int main(int argc, char **argv) {
 	check_disk();
 	load_mbr();
 	strcpy(CURRENT_DIRECTORY, "/");
-
+	super.super_root = 1;
 	/* dialog with user */
 	loop();
 
