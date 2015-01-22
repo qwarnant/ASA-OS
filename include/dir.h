@@ -11,6 +11,9 @@
 #define _DIR_H_
 
 #define ENTRYMAXLENGTH 	16
+#define FILE_SYSTEM_ROOT 1
+
+char CURRENT_DIRECTORY[256];
 
 /* return the inumber of an absolute pathname. 
    0 if not a valid pathname */
@@ -33,6 +36,8 @@ unsigned int inumber_of_basename(unsigned int idir, const char *basename);
 /* add/del an entry in the directory idir */
 int add_entry(unsigned int idir, unsigned int inumber, const char *basename);
 int del_entry(unsigned int idir, const char *basename);
+int init_file_system();
+void load_file_system_root();
 
 /* An entry. A null inumber indicates a free entry.
    Export the structure definition on order to be able to read/write

@@ -34,12 +34,10 @@ static unsigned int new_entry(file_desc_t *fd) {
 	/* look after a null inumber in an entry */
 	while (read_ifile(fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
 		if (!entry.ent_inumber){
-			printf("en : %d   it : %d\n",entry.ent_inumber,ientry);
 			return ientry;
 		}
 		ientry++;
 	}
-	printf("new entry : %d\n",ientry);
 	/* need to append an entry in the dir */
 	return ientry;
 }
@@ -68,6 +66,17 @@ static int find_entry(file_desc_t *fd, const char *basename) {
 	return RETURN_FAILURE;
 }
 
+int init_file_system() {
+	unsigned inumber = create_ifile(directory);
+	super.super_root = inumber;
+	CURRENT_DIRECTORY[0] = '/';
+}
+
+void load_file_system_root() {
+	strcpy(CURRENT_DIRECTORY, "/");
+	super.super_root = FILE_SYSTEM_ROOT;
+}
+
 /*------------------------------
  Create and delete entry
  ------------------------------------------------------------*/
@@ -89,7 +98,6 @@ int add_entry(unsigned int idir, unsigned int inumber, const char *basename) {
 
 	/* the new entry position in the file */
 	ientry = new_entry(fd);
-	printf("ientry : %d\n",ientry);
 	/* built the entry */
 	entry.ent_inumber = inumber;
 	strncpy(entry.ent_basename, basename, ENTRYMAXLENGTH);
