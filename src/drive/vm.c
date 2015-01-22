@@ -301,7 +301,6 @@ static void cd(struct _cmd *c) {
 
 	/* look after the right entry */
 	while (read_ifile(&fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
-		printf("entry : %d\n", entry.ent_inumber);
 		if (entry.ent_inumber && strcmp(entry.ent_basename, pathname) == 0) {
 			findEntry = TRUE;
 			break;
@@ -365,6 +364,9 @@ static void mkdir(struct _cmd *c) {
 	char dirname[ENTRYMAXLENGTH];
 	int status;
 
+	/* Get the pathname for the new directory */
+	(void) scanf("%s", dirname);
+
 	inumber = create_ifile(directory);
 	current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
 
@@ -417,7 +419,7 @@ static void rmdir(struct _cmd *c) {
 
 	/* Remove the directory entry */
 	status = del_entry(current_dir_inumber, dirname);
-	ffatal(!status, "Error when removing the entry");
+	ffatal(status, "Error when removing the entry");
 
 	/* Remove the directory file itself */
 	status = delete_ifile(inumber);
