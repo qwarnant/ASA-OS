@@ -158,9 +158,6 @@ unsigned int delete_inode(unsigned int inumber)
     }
     free_bloc(inumber);
 
-    memset(&inode, 0, sizeof(struct inode_s));
-    write_inode(inumber, &inode);
-
     return 0;
 }
 

@@ -146,8 +146,10 @@ void free_blocs(unsigned int *tab, unsigned int size)
 
 void display_filesystem()
 {
-    unsigned int i, vol_n_bloc, nb_bloc_size, util, dispo, percent, present;
+    unsigned int i, vol_n_bloc, nb_bloc_size, util, dispo, percent, present, current_volume_temp;
     struct vol_descr_s *vol;
+
+    current_volume_temp = current_volume; //copy
 
     printf("Sys de Fichiers -   Blocks -  Utilise - Disponible - Uti\n");
     for(i=0; i < mbr.mbr_n_vol; i++) {
@@ -156,7 +158,7 @@ void display_filesystem()
         vol_n_bloc = vol->vol_n_bloc;
         nb_bloc_size = vol_n_bloc*SECTOR_SIZE;
 
-        if(!load_super(i)) {
+        if(!load_super(i)) { //warning : modify the current volume var
             present = 1;
             dispo = current_super.super_n_free*SECTOR_SIZE;
             util = nb_bloc_size - dispo;
@@ -172,5 +174,7 @@ void display_filesystem()
                present==1 ? "present" : "non", nb_bloc_size,
                util, dispo, percent );
     }
+
+    current_volume = current_volume_temp; //restore
 
 }
