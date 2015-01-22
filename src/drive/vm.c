@@ -56,8 +56,8 @@ static struct _cmd commands[] =
 				{ "cd", cd,
 						"change the current directory to the specified directory" },
 				{ "mkdir", mkdir,
-						"create a new directory with the specified name" },
-				{ "rmdir", rmdir,
+						"create a new directory with the specified name" }, {
+						"rmdir", rmdir,
 						"remove a existing directory with the specified name" },
 				/* File management */
 				{ "cat", cat,
@@ -292,6 +292,34 @@ static void cd(struct _cmd *c) {
 	/* Get the pathname */
 	(void) scanf("%s", pathname);
 
+	if (pathname[0] == '.' && pathname[1] == '.') {
+		char *token;
+		char *lastvalue;
+		char newDir[256] = "";
+
+		token = strtok(CURRENT_DIRECTORY, "/");
+		if (token != NULL) {
+
+			while (token != NULL) {
+				strcat(newDir, "/");
+				lastvalue = strdup(token);
+
+				token = strtok(NULL, "/");
+				if (token != NULL) {
+					strcat(newDir, lastvalue);
+				}
+			}
+
+			strcpy(CURRENT_DIRECTORY,newDir);
+		} else {
+			/*
+			 * we are in the root folder, no ".." allowed
+			 */
+			load_file_system_root();
+		}
+		return;
+	}
+
 	/* open ifile */
 	status = open_ifile(&fd, current_dir_inumber);
 	ffatal(!status, "erreur ouverture fichier %d", inumber);
@@ -313,7 +341,11 @@ static void cd(struct _cmd *c) {
 		return;
 	}
 
-	strcpy(CURRENT_DIRECTORY, pathname);
+	if (strcmp(CURRENT_DIRECTORY, "/") != 0) {
+		strcat(CURRENT_DIRECTORY, "/");
+	}
+
+	strcat(CURRENT_DIRECTORY, pathname);
 }
 static void ls(struct _cmd *c) {
 	unsigned int current_dir_inumber = inumber_of_path(CURRENT_DIRECTORY);
@@ -332,7 +364,8 @@ static void ls(struct _cmd *c) {
 	seek2_ifile(&fd, 0);
 	/* look after the right entry */
 	while (read_ifile(&fd, &entry, sizeof(struct entry_s)) != READ_EOF) {
-		if(entry.ent_inumber == 0) continue; /* skip empty inode */
+		if (entry.ent_inumber == 0)
+			continue; /* skip empty inode */
 
 		printf("i:%d\t n: %s\n", entry.ent_inumber, entry.ent_basename);
 		ientry++;
@@ -390,21 +423,21 @@ static void touch(struct _cmd *c) {
 
 	/* Add the new entry in the current directory */
 	status = add_entry(current_dir_inumber, inumber, pathname);
-	ffatal(!status,  "Error when creating the new file");
+	ffatal(!status, "Error when creating the new file");
 
 	status = open_ifile(&fd, inumber);
 	ffatal(!status, "erreur ouverture fichier %d", inumber);
 
 	/* Fill the new created file */
-	while((c=getchar()) != EOF)
-		if(writec_ifile(&fd, car)==RETURN_FAILURE) {
-			fprintf(stderr, "Il n'y a plus de place pour ecrire sur cette partition.\n");
+	while ((c = getchar()) != EOF)
+		if (writec_ifile(&fd, car) == RETURN_FAILURE) {
+			fprintf(stderr,
+					"Il n'y a plus de place pour ecrire sur cette partition.\n");
 			break;
 		}
 
 	close_ifile(&fd);
 }
-
 
 static void rmdir(struct _cmd *c) {
 	unsigned int current_dir_inumber, inumber;
