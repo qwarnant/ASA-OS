@@ -310,7 +310,7 @@ static void cd(struct _cmd *c) {
 				}
 			}
 
-			strcpy(CURRENT_DIRECTORY,newDir);
+			strcpy(CURRENT_DIRECTORY, newDir);
 		} else {
 			/*
 			 * we are in the root folder, no ".." allowed
@@ -429,12 +429,17 @@ static void touch(struct _cmd *c) {
 	ffatal(!status, "erreur ouverture fichier %d", inumber);
 
 	/* Fill the new created file */
-	while ((c = getchar()) != EOF)
+	car = getchar();
+	/* just to get the first value and not reading it,  touch name_file text, it will not take the space
+	between the name_file and the text, so the file will not contains the return line or space*/
+
+	while ((car = getchar()) != EOF) {
 		if (writec_ifile(&fd, car) == RETURN_FAILURE) {
 			fprintf(stderr,
 					"Il n'y a plus de place pour ecrire sur cette partition.\n");
 			break;
 		}
+	}
 
 	close_ifile(&fd);
 }
