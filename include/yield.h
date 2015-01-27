@@ -6,7 +6,7 @@
 
 /*	The magic value to verify the consistance of the context structure  */
 #define CTX_MAGIC 0xCAFEBABE
-#define STACK_WIDTH 4
+#define STACK_WIDTH 16384
 
 typedef void funct_t(void *);
 
@@ -22,6 +22,7 @@ enum ctx_state_e {
 
 /* Define the context structure */
 struct ctx_s {
+	unsigned int ctx_id;
 	void * ctx_stack;
 	void * ctx_esp;
 	void * ctx_ebp;

@@ -10,15 +10,18 @@ struct ctx_s * ctx_hda;
 static void * initial_ebp;
 static void * initial_esp;
 
+unsigned int cpt_index = 1;
+
 int init_ctx(struct ctx_s * ctx, size_t stack_size, funct_t f, void * arg) {
 	ctx->ctx_stack = malloc(stack_size);
 
-	if (ctx->ctx_stack == NULL)
+	if (ctx->ctx_stack == NULL )
 		return -1;
 
 	ctx->ctx_ebp = ctx->ctx_esp = ((char*) ctx->ctx_stack)
 			+ stack_size- STACK_WIDTH;
 
+	ctx->ctx_id = cpt_index++;
 	ctx->ctx_f = f;
 	ctx->ctx_arg = arg;
 	ctx->ctx_state = CTX_INIT;
@@ -27,7 +30,7 @@ int init_ctx(struct ctx_s * ctx, size_t stack_size, funct_t f, void * arg) {
 }
 
 void switch_to_ctx(struct ctx_s * ctx) {
-
+	struct ctx_s *temp;
 	assert(ctx->ctx_magic == CTX_MAGIC);
 	irq_disable();
 
@@ -36,19 +39,20 @@ void switch_to_ctx(struct ctx_s * ctx) {
 			ctx_ring = current_ctx;
 		}
 
-		if(ctx == current_ctx) {
+		if (ctx == current_ctx) {
 			fprintf(stderr, "All context in the ring are blocked.\n");
 		}
-
+		temp = ctx;
 		ctx = ctx->ctx_next;
 
 		if (ctx->ctx_state == CTX_END) {
+			temp->ctx_next = ctx->ctx_next;
 			free(ctx->ctx_stack);
 			free(ctx);
 		}
 	}
 
-	if (current_ctx != NULL) {
+	if (current_ctx != NULL ) {
 
 		asm ("movl %%esp, %0" "\n\t" "movl %%ebp, %1"
 				: "=r"(current_ctx->ctx_esp), "=r"(current_ctx->ctx_ebp)
@@ -70,6 +74,7 @@ void switch_to_ctx(struct ctx_s * ctx) {
 }
 
 void start_current_ctx() {
+
 	current_ctx->ctx_state = CTX_EXE;
 	current_ctx->ctx_f(current_ctx->ctx_arg);
 	current_ctx->ctx_state = CTX_END;
@@ -89,13 +94,12 @@ int create_ctx(int stack_size, funct_t f, void* args) {
 		return -1;
 	}
 
-	if (ctx_ring == NULL) {
+	if (ctx_ring == NULL ) {
 		ctx_ring = new_ctx;
 		new_ctx->ctx_next = new_ctx;
 	} else {
 		new_ctx->ctx_next = ctx_ring->ctx_next;
 		ctx_ring->ctx_next = new_ctx;
-
 	}
 	init_ctx(new_ctx, (size_t) stack_size, f, args);
 
@@ -104,17 +108,17 @@ int create_ctx(int stack_size, funct_t f, void* args) {
 
 void yield() {
 
-	if (current_ctx != NULL) {
+	if (current_ctx != NULL ) {
 
-		if(ctx_hda != NULL) {
+		if (ctx_hda != NULL ) {
 			struct ctx_s * next = ctx_hda;
 			ctx_hda = NULL;
 			switch_to_ctx(next);
 		}
 
-	/*	if(waiting == TRUE) {
-			ctx_hda = current_ctx;
-		} */
+		/*	if(waiting == TRUE) {
+		 ctx_hda = current_ctx;
+		 } */
 
 		switch_to_ctx(current_ctx->ctx_next);
 

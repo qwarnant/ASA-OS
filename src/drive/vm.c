@@ -9,6 +9,7 @@
 #include "drive.h"
 #include "dir.h"
 #include "ifile.h"
+#include "yield.h"
 
 #define CURRENT_VOLUME 0U
 
@@ -31,6 +32,7 @@ static void cat(struct _cmd *c);
 static void touch(struct _cmd *c);
 static void mkdir(struct _cmd *c);
 static void rmdir(struct _cmd *c);
+static void compute(struct _cmd *c);
 
 static void frmt(struct _cmd *c);
 static void mknfs(struct _cmd *c);
@@ -47,6 +49,7 @@ static struct _cmd commands[] =
 		{ { "list", list, "display the partition table" }, { "new", new,
 				"create a new partition" },
 				{ "del", del, "delete a partition" },
+				{ "compute", compute, "" },
 
 				/* Directory management */
 				{ "ls", ls, "listing the current directory" }, { "cd", cd,
@@ -91,9 +94,31 @@ static void execute(const char *name) {
 
 static void loop(void) {
 	char name[64];
+	char temp[64];
 
-	while (printf("> "), scanf("%62s", name) == 1)
-		execute(name);
+	while (printf("%s> ", CURRENT_DIRECTORY), scanf("%62s", name) == 1) {
+		if (name[0] == '&') {
+			strncpy(temp, name + 1, 63);
+			create_ctx(STACK_WIDTH, execute, temp);
+			printf("%s\n", temp);
+yield();
+		} else {
+			execute(name);
+		}
+	}
+
+	printf("finished\n");
+}
+
+static void compute(struct _cmd *c) {
+	long i;
+	long j;
+	for (i = 0; i < 10000000; i++) {
+		pow(i, j);
+		j++;
+		j %= 1000;
+	}
+	printf("job finished\n");
 }
 
 /* ------------------------------
@@ -121,9 +146,9 @@ static void new(struct _cmd *c) {
 	/* pas de creation de partition dans le MBR et au-dela du disque */
 	if (!check_cs(fc, fs) || get_block(fc,fs) <= 0
 	|| get_block(fc,fs+nsector) >
-	MAX_CYLINDER*MAX_SECTOR) {
-		fprintf(stderr, "Vous ne pouvez pas creer "
-				"de partiton a cet emplacement.\n");
+	MAX_CYLINDER*MAX_SECTOR) {fprintf(stderr, "Vous ne pouvez pas creer "
+	"de partiton a cet emplacement.\n")
+		;
 	} else {
 		if (add_vol(fc, fs, size) != -1) {
 			printf("Partion creee\n");
@@ -153,7 +178,7 @@ static void save(struct _cmd *c) {
 static void mknfs(struct _cmd *c) {
 	char *cv, ch;
 	unsigned int current_vol;
-	if ((cv = getenv("CURRENT_VOLUME")) != NULL) {
+	if ((cv = getenv("CURRENT_VOLUME")) != NULL ) {
 		current_vol = (unsigned int) atoi(cv);
 	} else {
 		current_vol = CURRENT_VOLUME;
@@ -298,14 +323,14 @@ static void cd(struct _cmd *c) {
 		char newDir[256] = "";
 
 		token = strtok(CURRENT_DIRECTORY, "/");
-		if (token != NULL) {
+		if (token != NULL ) {
 
-			while (token != NULL) {
+			while (token != NULL ) {
 				strcat(newDir, "/");
 				lastvalue = strdup(token);
 
 				token = strtok(NULL, "/");
-				if (token != NULL) {
+				if (token != NULL ) {
 					strcat(newDir, lastvalue);
 				}
 			}
@@ -431,7 +456,7 @@ static void touch(struct _cmd *c) {
 	/* Fill the new created file */
 	car = getchar();
 	/* just to get the first value and not reading it,  touch name_file text, it will not take the space
-	between the name_file and the text, so the file will not contains the return line or space*/
+	 between the name_file and the text, so the file will not contains the return line or space*/
 
 	while ((car = getchar()) != EOF) {
 		if (writec_ifile(&fd, car) == RETURN_FAILURE) {
@@ -457,7 +482,6 @@ static void rmdir(struct _cmd *c) {
 
 	/* Remove the directory entry */
 	status = del_entry(current_dir_inumber, dirname);
-	ffatal(status, "Error when removing the entry");
 
 	/* Remove the directory file itself */
 	status = delete_ifile(inumber);
@@ -471,7 +495,14 @@ int main(int argc, char **argv) {
 	load_mbr();
 	load_file_system_root();
 	/* dialog with user */
-	loop();
+	create_ctx(STACK_WIDTH, loop, NULL );
+
+	/* Set up the IRQ system */
+	setup_irq(TIMER_IRQ, yield);
+	start_hw();
+
+	/* Start the context scheduler */
+	yield();
 
 	/* abnormal end of dialog (cause EOF for xample) */
 	do_xit();

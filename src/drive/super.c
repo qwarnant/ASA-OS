@@ -70,7 +70,7 @@ unsigned int new_bloc()
     unsigned int bloc, result;
     struct free_bloc_s fb;
     result = bloc = current_super.super_first_free_bloc;
-
+printf("current : %s\n",current_super.super_n_free);
     if(bloc!=0 && current_super.super_n_free>0) {
         read_bloc_n(current_volume, bloc, (unsigned char *)&fb,
                     sizeof(struct free_bloc_s));
