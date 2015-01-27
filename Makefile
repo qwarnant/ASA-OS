@@ -64,7 +64,7 @@ $(ODIR)/%.o: $(SRCDIR)/$(DRIVEDIR)/%.c $(DEPS)
 ###------------------------------------------------------------
 .PHONY: clean mrproper realclean
 clean:
-	rm -rf $(OBJ)	
+	rm -rf obj/*
 mrproper:
 	rm -rf $(OBJ) $(OBJECTSIF) rm $(BINARIES) $(BINARIESIF) vdiskA.bin vdiskB.bin
 realclean: clean 
