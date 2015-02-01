@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
+#include <time.h>
+#include <tools.h>
 #include "yield.h"
 
 struct ctx_s * current_ctx = NULL;
@@ -16,7 +19,7 @@ int init_ctx(struct ctx_s * ctx, size_t stack_size, funct_t f, void * arg) {
 	ctx->ctx_stack = malloc(stack_size);
 
 	if (ctx->ctx_stack == NULL )
-		return -1;
+		return RETURN_FAILURE;
 
 	ctx->ctx_ebp = ctx->ctx_esp = ((char*) ctx->ctx_stack)
 			+ stack_size- STACK_WIDTH;
@@ -26,7 +29,10 @@ int init_ctx(struct ctx_s * ctx, size_t stack_size, funct_t f, void * arg) {
 	ctx->ctx_arg = arg;
 	ctx->ctx_state = CTX_INIT;
 	ctx->ctx_magic = CTX_MAGIC;
-	return EXIT_SUCCESS;
+    ctx->ctx_start_time = (unsigned int) time(NULL);
+    ctx->ctx_exec_time = 0;
+
+	return RETURN_SUCCESS;
 }
 
 void switch_to_ctx(struct ctx_s * ctx) {
@@ -91,7 +97,7 @@ int create_ctx(int stack_size, funct_t f, void* args) {
 	struct ctx_s * new_ctx;
 	new_ctx = malloc(sizeof(struct ctx_s));
 	if (new_ctx == 0) {
-		return -1;
+		return RETURN_FAILURE;
 	}
 
 	if (ctx_ring == NULL ) {
@@ -101,9 +107,11 @@ int create_ctx(int stack_size, funct_t f, void* args) {
 		new_ctx->ctx_next = ctx_ring->ctx_next;
 		ctx_ring->ctx_next = new_ctx;
 	}
-	init_ctx(new_ctx, (size_t) stack_size, f, args);
+	if(init_ctx(new_ctx, (size_t) stack_size, f, args) == RETURN_FAILURE) {
+        return RETURN_FAILURE;
+    }
 
-	return 0;
+	return RETURN_SUCCESS;
 }
 
 void yield() {
@@ -129,4 +137,18 @@ void yield() {
 		switch_to_ctx(ctx_ring);
 	}
 
+}
+
+void get_state_name(enum ctx_state_e state, char* string) {
+    if(state == CTX_INIT) {
+        strcpy(string, "INIT");
+    } else if(state == CTX_EXE) {
+        strcpy(string, "EXE");
+    } else if(state == CTX_STOP) {
+        strcpy(string, "STOP");
+    } else if(state == CTX_END){
+        strcpy(string, "END");
+    }  else {
+        strcpy(string, "UNK");
+    }
 }

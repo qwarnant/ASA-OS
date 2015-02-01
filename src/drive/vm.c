@@ -33,6 +33,7 @@ static void touch(struct _cmd *c);
 static void mkdir(struct _cmd *c);
 static void rmdir(struct _cmd *c);
 static void compute(struct _cmd *c);
+static void top(struct _cmd *c);
 
 static void frmt(struct _cmd *c);
 static void mknfs(struct _cmd *c);
@@ -50,7 +51,7 @@ static struct _cmd commands[] =
 				"create a new partition" },
 				{ "del", del, "delete a partition" },
 				{ "compute", compute, "" },
-
+                { "top", top, "display all process" },
 				/* Directory management */
 				{ "ls", ls, "listing the current directory" }, { "cd", cd,
 						"change the current directory" }, { "mkdir", mkdir,
@@ -95,13 +96,15 @@ static void execute(const char *name) {
 static void loop(void) {
 	char name[64];
 	char temp[64];
+    int status;
 
 	while (printf("%s> ", CURRENT_DIRECTORY), scanf("%62s", name) == 1) {
 		if (name[0] == '&') {
 			strncpy(temp, name + 1, 63);
-			create_ctx(STACK_WIDTH, execute, temp);
-			printf("%s\n", temp);
-yield();
+			status = create_ctx(STACK_WIDTH, execute, temp);
+            ffatal(!status, "Failed to create context : %s", name);
+
+			printf("%s %d\n", temp, status);
 		} else {
 			execute(name);
 		}
@@ -126,6 +129,17 @@ static void compute(struct _cmd *c) {
  ------------------------------------------------------------*/
 static void list(struct _cmd *c) {
 	display_mbr();
+}
+
+static void top(struct _cmd *c) {
+    struct ctx_s * tmp = current_ctx;
+    char state_name[4];
+    printf("PID\tEBP\t\tESP\t\tSTATE\t\tSTART\t\tUPTIME\n");
+    do {
+        get_state_name(tmp->ctx_state, state_name);
+        printf("%d\t%p\t%p\t%s\t\t%d\t%d\n", tmp->ctx_id, tmp->ctx_ebp, tmp->ctx_esp, state_name, tmp->ctx_start_time, tmp->ctx_exec_time);
+        tmp = tmp->ctx_next;
+    } while(tmp != current_ctx);
 }
 
 static void new(struct _cmd *c) {

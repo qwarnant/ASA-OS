@@ -23,6 +23,8 @@ enum ctx_state_e {
 /* Define the context structure */
 struct ctx_s {
 	unsigned int ctx_id;
+    unsigned int ctx_start_time;
+    unsigned int ctx_exec_time;
 	void * ctx_stack;
 	void * ctx_esp;
 	void * ctx_ebp;
@@ -69,5 +71,7 @@ void switch_to_ctx(struct ctx_s * ctx);
 	This method starts the execution of the current context
  */
 void start_current_ctx();
+
+void get_state_name(enum ctx_state_e state, char* string);
 
 #endif

@@ -20,8 +20,8 @@ typedef void (irq_handler_func_t)(void);
 #define TIMER_IRQ	2
 
 /* a 8 milliseconds timer */
-#define TIMER_SEC  0
-#define TIMER_USEC 500
+#define TIMER_SEC  5
+#define TIMER_USEC 0
 
 void setup_irq(unsigned int irq, irq_handler_func_t handler);
 void start_hw();
