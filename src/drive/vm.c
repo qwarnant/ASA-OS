@@ -102,7 +102,10 @@ static void loop(void) {
 		if (name[0] == '&') {
 			strncpy(temp, name + 1, 63);
 			status = create_ctx(STACK_WIDTH, execute, temp);
-            ffatal(!status, "Failed to create context : %s", name);
+            if(status == RETURN_FAILURE) {
+                fprintf(stderr, "Failed to create context : %s\n", name);
+                return;
+            }
 
 			printf("%s %d\n", temp, status);
 		} else {

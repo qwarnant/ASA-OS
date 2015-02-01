@@ -111,18 +111,20 @@ int create_ctx(int stack_size, funct_t f, void* args) {
         return RETURN_FAILURE;
     }
 
-	return RETURN_SUCCESS;
+    fprintf(stderr, "%p %p\n", ctx_ring->ctx_next->ctx_ebp, new_ctx->ctx_ebp);
+
+	return new_ctx->ctx_id;
 }
 
 void yield() {
 
 	if (current_ctx != NULL ) {
 
-		if (ctx_hda != NULL ) {
+		/*if (ctx_hda != NULL ) {
 			struct ctx_s * next = ctx_hda;
 			ctx_hda = NULL;
 			switch_to_ctx(next);
-		}
+		}*/
 
 		/*	if(waiting == TRUE) {
 		 ctx_hda = current_ctx;
