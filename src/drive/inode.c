@@ -7,9 +7,9 @@
 #include "super.h"
 #include "tools.h"
 
-#define NNBPB (SECTOR_SIZE/sizeof(int))
+#define NNBPB (HDA_SECTORSIZE/sizeof(int))
 
-static unsigned char clear[SECTOR_SIZE];
+static unsigned char clear[HDA_SECTORSIZE];
 
 static unsigned int get_vbloc_of_fbloc(unsigned int inumber, unsigned int fbloc,
                             bool_t do_allocate)

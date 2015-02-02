@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -94,24 +96,33 @@ static void execute(const char *name) {
 }
 
 static void loop(void) {
-	char name[64];
+
 	char temp[64];
     int status;
+int stop =0;
 
-	while (printf("%s> ", CURRENT_DIRECTORY), scanf("%62s", name) == 1) {
-		if (name[0] == '&') {
-			strncpy(temp, name + 1, 63);
+char * test;
+	while (!stop){
+
+		//printf("%s> ", CURRENT_DIRECTORY);
+		test = readline(">");
+        printf("val : %s\n",test);
+
+		if (test[0] == '&') {
+			strncpy(temp, test + 1, strlen(test));
 			status = create_ctx(STACK_WIDTH, execute, temp);
 
             if(status == RETURN_FAILURE) {
-                fprintf(stderr, "Failed to create context : %s\n", name);
+                fprintf(stderr, "Failed to create context : %s\n", test);
                 return;
             }
 
 			printf("%s %d\n", temp, status);
 		} else {
-			execute(name);
+			execute(test);
 		}
+		free(test);
+
 	}
 
 	printf("finished\n");
@@ -161,11 +172,11 @@ static void new(struct _cmd *c) {
 		printf("taille(>0) : ");
 	} while (scanf("%u", &size) && (size <= 0));
 
-	nsector = ceil((double) size / SECTOR_SIZE);
+	nsector = ceil((double) size / HDA_SECTORSIZE);
 	/* pas de creation de partition dans le MBR et au-dela du disque */
 	if (!check_cs(fc, fs) || get_block(fc,fs) <= 0
 	|| get_block(fc,fs+nsector) >
-	MAX_CYLINDER*MAX_SECTOR) {fprintf(stderr, "Vous ne pouvez pas creer "
+	HDA_MAXSECTOR*HDA_MAXCYLINDER) {fprintf(stderr, "Vous ne pouvez pas creer "
 	"de partiton a cet emplacement.\n")
 		;
 	} else {
@@ -231,31 +242,31 @@ static void frmt(struct _cmd *c) {
 	v = 0;
 	printf("formatage du disque en cours...\n");
 	fflush(stdout);
-	for (cy = 0; cy < MAX_CYLINDER; cy++)
-		for (s = 0; s < MAX_SECTOR; s++)
-			format_sector(cy, s, SECTOR_SIZE, v);
+	for (cy = 0; cy < HDA_MAXCYLINDER; cy++)
+		for (s = 0; s < HDA_MAXSECTOR; s++)
+			format_sector(cy, s, HDA_SECTORSIZE, v);
 	printf("fin du formatage.\n");
 }
 
 static void dmps(struct _cmd *c) {
-	unsigned char buffer[SECTOR_SIZE];
+	unsigned char buffer[HDA_SECTORSIZE];
 	unsigned int cy, s, size;
 
-	memset(buffer, 0, SECTOR_SIZE);
+	memset(buffer, 0, HDA_SECTORSIZE);
 
 	do {
-		printf("Cylindre (max %i) : ", MAX_CYLINDER - 1);
-	} while (scanf("%u", &cy) && cy >= MAX_CYLINDER);
+		printf("Cylindre (max %i) : ", HDA_MAXCYLINDER - 1);
+	} while (scanf("%u", &cy) && cy >= HDA_MAXCYLINDER);
 
 	do {
-		printf("Secteur (max %i) : ", MAX_SECTOR - 1);
-	} while (scanf("%u", &s) && s >= MAX_SECTOR);
+		printf("Secteur (max %i) : ", HDA_MAXSECTOR - 1);
+	} while (scanf("%u", &s) && s >= HDA_MAXSECTOR);
 
-	printf("size (max %i) : ", SECTOR_SIZE);
+	printf("size (max %i) : ", HDA_SECTORSIZE);
 	(void) scanf("%u", &size);
 
 	if (size <= 0 || size > 512)
-		size = SECTOR_SIZE;
+		size = HDA_SECTORSIZE;
 
 	read_sector_n(cy, s, buffer, size);
 	dump(buffer, size, 1, 1);
@@ -544,15 +555,16 @@ int main(int argc, char **argv) {
 	load_mbr();
 	load_file_system_root();
 	/* dialog with user */
-	create_ctx(STACK_WIDTH, loop, NULL );
 
-	/* Set up the IRQ system */
-	setup_irq(TIMER_IRQ, yield);
-	start_hw();
+	//create_ctx(STACK_WIDTH, loop, NULL );
+loop();
 
-	/* Start the context scheduler */
+	/*
+	 * init
+	 */
 	yield();
 
+	printf("No more active ctx\n");
 	/* abnormal end of dialog (cause EOF for xample) */
 	do_xit();
 

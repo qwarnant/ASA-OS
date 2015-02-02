@@ -7,12 +7,14 @@
 
 #define MAGIC 0xDEADBEEF
 
+struct mbr_descr_s mbr;
+
 void check_struc_mbr()
 {
-    if(sizeof(struct mbr_descr_s)>SECTOR_SIZE) {
+    if(sizeof(struct mbr_descr_s)>HDA_SECTORSIZE) {
         printf("le disque n'est pas compatible avec le programme "
                "la taille d'un secteur (%i) ne peut pas contenir "
-               "celle du mbr (%lu)\n", SECTOR_SIZE, sizeof(struct mbr_descr_s));
+               "celle du mbr (%lu)\n", HDA_SECTORSIZE, sizeof(struct mbr_descr_s));
         exit(EXIT_FAILURE);
     }
 }
@@ -62,7 +64,7 @@ int add_vol(unsigned int c, unsigned int s, unsigned int size)
         return -1;
     }
 
-    nsector = ceil((double)size/SECTOR_SIZE);
+    nsector = ceil((double)size/HDA_SECTORSIZE);
     for(i=0; i < mbr.mbr_n_vol; i++) {
         vol = &mbr.mbr_vol[i];
         /* verifie que la partition ne se situe pas
@@ -108,19 +110,19 @@ unsigned int cylindre_of_bloc(unsigned int vol, unsigned int blk)
 {
     struct vol_descr_s *volume;
     volume = &mbr.mbr_vol[vol];
-    return volume->vol_first_cylinder + (volume->vol_first_sector + blk)/MAX_SECTOR;
+    return volume->vol_first_cylinder + (volume->vol_first_sector + blk)/HDA_MAXSECTOR;
 }
 
 unsigned int sector_of_bloc(unsigned int vol, unsigned int blk)
 {
     struct vol_descr_s *volume;
     volume = &mbr.mbr_vol[vol];
-    return (volume->vol_first_sector + blk) % MAX_SECTOR;
+    return (volume->vol_first_sector + blk) % HDA_MAXSECTOR;
 }
 
 void read_bloc(unsigned int vol, unsigned int blk, unsigned char *buffer)
 {
-    if(vol<8 && blk < SECTOR_SIZE) {
+    if(vol<8 && blk < HDA_SECTORSIZE) {
         read_sector(cylindre_of_bloc(vol, blk),
                     sector_of_bloc(vol, blk), buffer);
     }
@@ -128,7 +130,7 @@ void read_bloc(unsigned int vol, unsigned int blk, unsigned char *buffer)
 
 void write_bloc(unsigned int vol, unsigned int blk, unsigned char *buffer)
 {
-    if(vol<8 && blk < SECTOR_SIZE) {
+    if(vol<8 && blk < HDA_SECTORSIZE) {
         write_sector(cylindre_of_bloc(vol, blk),
                      sector_of_bloc(vol, blk), buffer);
     }
@@ -137,7 +139,7 @@ void write_bloc(unsigned int vol, unsigned int blk, unsigned char *buffer)
 void read_bloc_n(unsigned int vol, unsigned int blk, unsigned char *buffer,
                  unsigned int n)
 {
-    if(vol<8 && blk < SECTOR_SIZE) {
+    if(vol<8 && blk < HDA_SECTORSIZE) {
         read_sector_n(cylindre_of_bloc(vol, blk),
                       sector_of_bloc(vol, blk), buffer, n);
     }
@@ -146,7 +148,7 @@ void read_bloc_n(unsigned int vol, unsigned int blk, unsigned char *buffer,
 void write_bloc_n(unsigned int vol, unsigned int blk, unsigned char *buffer,
                   unsigned int n)
 {
-    if(vol<8 && blk < SECTOR_SIZE) {
+    if(vol<8 && blk < HDA_SECTORSIZE) {
         write_sector_n(cylindre_of_bloc(vol, blk),
                        sector_of_bloc(vol, blk), buffer, n);
     }
@@ -154,5 +156,5 @@ void write_bloc_n(unsigned int vol, unsigned int blk, unsigned char *buffer,
 
 unsigned int get_block(unsigned int c, unsigned int s)
 {
-    return c*MAX_SECTOR + s;
+    return c*HDA_MAXSECTOR + s;
 }

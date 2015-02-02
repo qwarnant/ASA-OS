@@ -16,7 +16,7 @@ void read_sector(unsigned int c, unsigned int s, unsigned char *buffer)
         _out(HDA_DATAREGS,1);
         _out(HDA_CMDREG,CMD_READ);
         _sleep(HDA_IRQ); /* attente de HDA_IRQ */
-        memcpy(buffer, MASTERBUFFER, SECTOR_SIZE);
+        memcpy(buffer, MASTERBUFFER, HDA_SECTORSIZE);
     }
 }
 
@@ -29,14 +29,14 @@ void read_sector_n(unsigned int c, unsigned int s, unsigned char *buffer,
         _out(HDA_CMDREG,CMD_READ);
         _sleep(HDA_IRQ); /* attente de HDA_IRQ */
        // yield();
-        memcpy(buffer, MASTERBUFFER, n < SECTOR_SIZE ? n : SECTOR_SIZE);
+        memcpy(buffer, MASTERBUFFER, n < HDA_SECTORSIZE ? n : HDA_SECTORSIZE);
     }
 }
 
 void write_sector(unsigned int c, unsigned int s, unsigned char *buffer)
 {
     if(check_cs(c,s)) {
-        memcpy(MASTERBUFFER, buffer, SECTOR_SIZE);
+        memcpy(MASTERBUFFER, buffer, HDA_SECTORSIZE);
         goto_sector(c,s);
         _out(HDA_CMDREG,CMD_WRITE);
         _sleep(HDA_IRQ); /* attente de HDA_IRQ */
@@ -48,7 +48,7 @@ void write_sector_n(unsigned int c, unsigned int s, unsigned char *buffer,
                     unsigned int n)
 {
     if(check_cs(c,s)) {
-        memcpy(MASTERBUFFER, buffer, n < SECTOR_SIZE ? n : SECTOR_SIZE);
+        memcpy(MASTERBUFFER, buffer, n < HDA_SECTORSIZE ? n : HDA_SECTORSIZE);
         goto_sector(c,s);
         _out(HDA_CMDREG, CMD_WRITE);
        _sleep(HDA_IRQ); /* attente de HDA_IRQ */
@@ -60,7 +60,7 @@ void format_sector(unsigned int c, unsigned int s, unsigned int nsector,
                    unsigned int value)
 {
     if(check_cs(c,s)) {
-        nsector = nsector > SECTOR_SIZE ? SECTOR_SIZE : nsector;
+        nsector = nsector > HDA_SECTORSIZE ? HDA_SECTORSIZE : nsector;
         goto_sector(c,s);
         _out(HDA_DATAREGS, (nsector >> 8) & 0xFF);
         _out(HDA_DATAREGS+1, nsector&0xFF);
@@ -104,12 +104,23 @@ void init_master() {
         fprintf(stderr, "Error in hardware initialization\n");
         exit(EXIT_FAILURE);
     }
+
+
+
+    /* disallows all IT */
+    irq_disable();
+
     /* Interreupt handlers */
     for(i=0; i<16; i++)
         IRQVECTOR[i] = empty_it;
 
-    /* Allows all IT */
-    _mask(1);
+
+    _out(TIMER_ALARM,0xFFFFFFFF-20);  /* alarm at next tick (at 0xFFFFFFFF) */
+    _out(TIMER_PARAM,128+64); /* reset + alarm on */
+
+    IRQVECTOR[TIMER_IRQ] = yield;
+
+    irq_enable();
 }
 
 void check_disk()
@@ -128,19 +139,19 @@ void check_disk()
     printf("nombre maximum de cylindres :\t%i\n", cylindre_max);
     printf("nombre maximum de secteurs :\t%i\n\n", sector_max);*/
 
-    if(sector_size!=SECTOR_SIZE) {
+    if(sector_size!=HDA_SECTORSIZE) {
         printf("Mauvaise valeur pour la taille du secteur (%i)\n",
-               SECTOR_SIZE);
+        		HDA_SECTORSIZE);
         error = 1;
     }
-    if(sector_max!=MAX_SECTOR) {
+    if(sector_max!=HDA_MAXSECTOR) {
         printf("Mauvaise valeur pour le nombre max de secteur (%i)\n",
-               MAX_SECTOR);
+        		HDA_MAXSECTOR);
         error = 1;
     }
-    if(cylindre_max!=MAX_CYLINDER)  {
+    if(cylindre_max!=HDA_MAXCYLINDER)  {
         printf("Mauvaise valeur pour le nombre max de cylindre (%i)\n",
-               MAX_CYLINDER);
+        		HDA_MAXCYLINDER);
         error = 1;
     }
 
@@ -159,5 +170,5 @@ void check_disk()
  */
 unsigned int check_cs(unsigned int c, unsigned int s)
 {
-    return  (c < MAX_CYLINDER && s < MAX_SECTOR);
+    return  (c < HDA_MAXCYLINDER && s < HDA_MAXSECTOR);
 }
