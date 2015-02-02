@@ -40,6 +40,7 @@ void switch_to_ctx(struct ctx_s * ctx) {
 	assert(ctx->ctx_magic == CTX_MAGIC);
 	irq_disable();
 
+
 	while (ctx->ctx_state == CTX_END || ctx->ctx_state == CTX_STOP) {
 		if (ctx_ring == ctx) {
 			ctx_ring = current_ctx;
@@ -72,6 +73,7 @@ void switch_to_ctx(struct ctx_s * ctx) {
 			: "r"(current_ctx->ctx_esp), "r"(current_ctx->ctx_ebp));
 
 	if (current_ctx->ctx_state == CTX_INIT) {
+		irq_enable();
 		start_current_ctx();
 	}
 	irq_enable();
@@ -118,6 +120,9 @@ int create_ctx(int stack_size, funct_t f, void* args) {
 
 void yield() {
 
+
+	_out(TIMER_ALARM, 0xffffffff - 20);
+
 	if (current_ctx != NULL ) {
 
 		/*if (ctx_hda != NULL ) {
@@ -138,6 +143,8 @@ void yield() {
 				:);
 		switch_to_ctx(ctx_ring);
 	}
+
+
 
 }
 

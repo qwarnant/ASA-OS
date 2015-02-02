@@ -31,7 +31,7 @@ struct mbr_descr_s {
     struct vol_descr_s mbr_vol[MAX_VOL]; /* first mbr_n_vol are in used */
 };
 
-struct mbr_descr_s mbr;
+extern struct mbr_descr_s mbr;
 
 /* return RETURN_FAILURE in case of a non preexisting mbr */
 int load_mbr();

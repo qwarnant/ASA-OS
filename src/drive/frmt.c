@@ -26,9 +26,9 @@ int main(int argc, char **argv)
         check_disk();
         printf("formatage du disque en cours...\n");
         fflush(stdout);
-        for(c = 0; c < MAX_CYLINDER; c++)
-            for(s = 0; s < MAX_SECTOR; s++)
-                format_sector(c, s, SECTOR_SIZE, v);
+        for(c = 0; c < HDA_MAXCYLINDER; c++)
+            for(s = 0; s < HDA_MAXSECTOR; s++)
+                format_sector(c, s, HDA_SECTORSIZE, v);
         printf("fin du formatage.\n");
         fflush(stdout);
     }

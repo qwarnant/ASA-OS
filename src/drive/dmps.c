@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
 
     unsigned int c, s, n;
-    unsigned char buffer[SECTOR_SIZE];
+    unsigned char buffer[HDA_SECTORSIZE];
 
     if(argc < 3 || argc > 4) {
         fprintf(stderr, "Usage: %s numcylindre numsector [size] \n",
@@ -25,20 +25,20 @@ int main(int argc, char **argv)
         c = atoi(argv[1]);
         s = atoi(argv[2]);
         if(check_cs(c,s)) {
-            n = SECTOR_SIZE;
+            n = HDA_SECTORSIZE;
             if(argc==4) {
                 n = atoi(argv[3]);
-                n = n < SECTOR_SIZE ? n : SECTOR_SIZE;
+                n = n < HDA_SECTORSIZE ? n : HDA_SECTORSIZE;
             }
             read_sector_n(c, s, buffer, n);
             dump(buffer, n, 1, 1);
         } else {
-            if(c >= MAX_CYLINDER)
+            if(c >= HDA_MAXCYLINDER)
                 fprintf(stderr, "Cylindre demandee : %u, max : %i\n",
-                        c, MAX_CYLINDER-1);
-            if(s >= MAX_SECTOR)
+                        c, HDA_MAXCYLINDER-1);
+            if(s >= HDA_MAXSECTOR)
                 fprintf(stderr, "Secteur demandee : %u, max : %i\n",
-                        s, MAX_SECTOR-1 );
+                        s, HDA_MAXSECTOR-1 );
         }
 
     }

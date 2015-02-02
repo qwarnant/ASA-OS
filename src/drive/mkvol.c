@@ -70,12 +70,12 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    nsector = ceil((double)size/SECTOR_SIZE);
+    nsector = ceil((double)size/HDA_SECTORSIZE);
     /* pas de creation de partition dans le MBR et au-dela du disque */
     if(!check_cs(fc, fs)
             || get_block(fc,fs) <= 0
             || get_block(fc,fs+nsector) >
-            MAX_CYLINDER*MAX_SECTOR) {
+            HDA_MAXCYLINDER*HDA_MAXSECTOR) {
         fprintf(stderr,"Vous ne pouvez pas creer "
                 "de partiton a cet emplacement.\n");
         exit(EXIT_FAILURE);
