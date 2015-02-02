@@ -117,7 +117,6 @@ int create_ctx(int stack_size, funct_t f, void* args) {
 	if(init_ctx(new_ctx, (size_t) stack_size, f, args) == RETURN_FAILURE) {
         return RETURN_FAILURE;
     }
-    fprintf(stderr, "%p %p %p \n", ctx_ring->ctx_next->ctx_ebp, new_ctx->ctx_ebp, new_ctx->ctx_next);
 
 	return new_ctx->ctx_id;
 }
