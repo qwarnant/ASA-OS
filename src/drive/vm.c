@@ -333,6 +333,11 @@ static void cd(struct _cmd *c) {
 	int status;
 	char pathname[ENTRYMAXLENGTH];
 
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
+
 	/* Get the pathname */
 	(void) scanf("%s", pathname);
 
@@ -398,6 +403,11 @@ static void ls(struct _cmd *c) {
 	unsigned int ientry = 0, inumber = 0; /* the entry index */
 	int status;
 
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
+
 	printf("Current directory : %s\n", CURRENT_DIRECTORY);
 
 	/* open ifile */
@@ -423,6 +433,11 @@ static void cat(struct _cmd *c) {
 	unsigned inumber;
 	char pathname[ENTRYMAXLENGTH];
 
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
+
 	(void) scanf("%s", pathname);
 
 	inumber = inumber_of_path(pathname);
@@ -441,6 +456,11 @@ static void mkdir(struct _cmd *c) {
 	char dirname[ENTRYMAXLENGTH];
 	int status;
 
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
+
 	/* Get the pathname for the new directory */
 	(void) scanf("%s", dirname);
 
@@ -457,6 +477,11 @@ static void touch(struct _cmd *c) {
 	int status;
 	int car;
 	char pathname[ENTRYMAXLENGTH];
+
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
 
 	(void) scanf("%s", pathname);
 
@@ -492,6 +517,11 @@ static void rmdir(struct _cmd *c) {
 	unsigned int current_dir_inumber, inumber;
 	int status;
 	char dirname[ENTRYMAXLENGTH];
+
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
 
 	(void) scanf("%s", dirname);
 
