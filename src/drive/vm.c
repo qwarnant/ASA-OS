@@ -102,6 +102,7 @@ static void loop(void) {
 		if (name[0] == '&') {
 			strncpy(temp, name + 1, 63);
 			status = create_ctx(STACK_WIDTH, execute, temp);
+
             if(status == RETURN_FAILURE) {
                 fprintf(stderr, "Failed to create context : %s\n", name);
                 return;
@@ -135,14 +136,16 @@ static void list(struct _cmd *c) {
 }
 
 static void top(struct _cmd *c) {
-    struct ctx_s * tmp = current_ctx;
+    struct ctx_s tmp = *ctx_ring;
     char state_name[4];
     printf("PID\tEBP\t\tESP\t\tSTATE\t\tSTART\t\tUPTIME\n");
     do {
-        get_state_name(tmp->ctx_state, state_name);
-        printf("%d\t%p\t%p\t%s\t\t%d\t%d\n", tmp->ctx_id, tmp->ctx_ebp, tmp->ctx_esp, state_name, tmp->ctx_start_time, tmp->ctx_exec_time);
-        tmp = tmp->ctx_next;
-    } while(tmp != current_ctx);
+        get_state_name(tmp.ctx_state, state_name);
+        printf("%d\t%p\t%p\t%s\t\t%d\t%d\n", tmp.ctx_id, tmp.ctx_ebp, tmp.ctx_esp, state_name, tmp.ctx_start_time, tmp.ctx_exec_time);
+        printf("%p\n", tmp.ctx_next);
+
+        tmp = *tmp.ctx_next;
+    } while(tmp.ctx_id != ctx_ring->ctx_id);
 }
 
 static void new(struct _cmd *c) {

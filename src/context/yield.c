@@ -13,6 +13,7 @@ struct ctx_s * ctx_hda;
 static void * initial_ebp;
 static void * initial_esp;
 
+static unsigned int current_ctx_start_time;
 unsigned int cpt_index = 1;
 
 int init_ctx(struct ctx_s * ctx, size_t stack_size, funct_t f, void * arg) {
@@ -64,8 +65,14 @@ void switch_to_ctx(struct ctx_s * ctx) {
 				: "=r"(current_ctx->ctx_esp), "=r"(current_ctx->ctx_ebp)
 				:);
 
+		/* Put the new uptime in the structure */
+		current_ctx->ctx_exec_time += (((int) time(NULL)) - current_ctx_start_time);
 	}
+
 	current_ctx = ctx;
+
+	/* Start the uptime */
+	current_ctx_start_time = (unsigned int) time(NULL);
 
 	asm ("movl %0, %%esp" "\n\t" "movl %1, %%ebp"
 			:
@@ -110,14 +117,12 @@ int create_ctx(int stack_size, funct_t f, void* args) {
 	if(init_ctx(new_ctx, (size_t) stack_size, f, args) == RETURN_FAILURE) {
         return RETURN_FAILURE;
     }
-
-    fprintf(stderr, "%p %p\n", ctx_ring->ctx_next->ctx_ebp, new_ctx->ctx_ebp);
+    fprintf(stderr, "%p %p %p \n", ctx_ring->ctx_next->ctx_ebp, new_ctx->ctx_ebp, new_ctx->ctx_next);
 
 	return new_ctx->ctx_id;
 }
 
 void yield() {
-
 	if (current_ctx != NULL ) {
 
 		/*if (ctx_hda != NULL ) {
