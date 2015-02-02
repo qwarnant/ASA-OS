@@ -111,6 +111,7 @@ char * test;
 		if (test[0] == '&') {
 			strncpy(temp, test + 1, strlen(test));
 			status = create_ctx(STACK_WIDTH, execute, temp);
+
             if(status == RETURN_FAILURE) {
                 fprintf(stderr, "Failed to create context : %s\n", test);
                 return;
@@ -146,14 +147,15 @@ static void list(struct _cmd *c) {
 }
 
 static void top(struct _cmd *c) {
-    struct ctx_s * tmp = current_ctx;
+    struct ctx_s tmp = *ctx_ring;
     char state_name[4];
     printf("PID\tEBP\t\tESP\t\tSTATE\t\tSTART\t\tUPTIME\n");
     do {
-        get_state_name(tmp->ctx_state, state_name);
-        printf("%d\t%p\t%p\t%s\t\t%d\t%d\n", tmp->ctx_id, tmp->ctx_ebp, tmp->ctx_esp, state_name, tmp->ctx_start_time, tmp->ctx_exec_time);
-        tmp = tmp->ctx_next;
-    } while(tmp != current_ctx);
+        get_state_name(tmp.ctx_state, state_name);
+        printf("%d\t%p\t%p\t%s\t\t%d\t%d\n", tmp.ctx_id, tmp.ctx_ebp, tmp.ctx_esp, state_name, tmp.ctx_start_time, tmp.ctx_exec_time);
+
+        tmp = *tmp.ctx_next;
+    } while(tmp.ctx_id != ctx_ring->ctx_id);
 }
 
 static void new(struct _cmd *c) {
@@ -342,6 +344,11 @@ static void cd(struct _cmd *c) {
 	int status;
 	char pathname[ENTRYMAXLENGTH];
 
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
+
 	/* Get the pathname */
 	(void) scanf("%s", pathname);
 
@@ -407,6 +414,11 @@ static void ls(struct _cmd *c) {
 	unsigned int ientry = 0, inumber = 0; /* the entry index */
 	int status;
 
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
+
 	printf("Current directory : %s\n", CURRENT_DIRECTORY);
 
 	/* open ifile */
@@ -432,6 +444,11 @@ static void cat(struct _cmd *c) {
 	unsigned inumber;
 	char pathname[ENTRYMAXLENGTH];
 
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
+
 	(void) scanf("%s", pathname);
 
 	inumber = inumber_of_path(pathname);
@@ -450,6 +467,11 @@ static void mkdir(struct _cmd *c) {
 	char dirname[ENTRYMAXLENGTH];
 	int status;
 
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
+
 	/* Get the pathname for the new directory */
 	(void) scanf("%s", dirname);
 
@@ -466,6 +488,11 @@ static void touch(struct _cmd *c) {
 	int status;
 	int car;
 	char pathname[ENTRYMAXLENGTH];
+
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
 
 	(void) scanf("%s", pathname);
 
@@ -501,6 +528,11 @@ static void rmdir(struct _cmd *c) {
 	unsigned int current_dir_inumber, inumber;
 	int status;
 	char dirname[ENTRYMAXLENGTH];
+
+	if (load_super(current_volume)) {
+		fprintf(stderr, "No filesystem on the current partition.\n");
+		return;
+	}
 
 	(void) scanf("%s", dirname);
 
