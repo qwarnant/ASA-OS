@@ -90,6 +90,7 @@ static struct _cmd commands[] =
 static void execute(const char *name) {
 	struct _cmd *c = commands;
 
+    printf("%s\n", name);
 	while (c->name && strcmp(name, c->name))
 		c++;
 	(*c->fun)(c);
@@ -100,11 +101,14 @@ static void loop(void) {
 	char temp[64];
     int status;
 
+    memset(name, '\0', sizeof(name));
+    memset(temp, '\0', sizeof(temp));
+// avant la boucle
 	while (printf("%s> ", CURRENT_DIRECTORY), scanf("%62s", name) == 1){
         printf("val : %s\n",name);
 
 		if (name[0] == '&') {
-			strncpy(temp, name + 1, strlen(63));
+			strncpy(temp, name + 1, strlen(name)-1);
 			status = create_ctx(STACK_WIDTH, execute, temp);
 
             if(status == RETURN_FAILURE) {
@@ -116,7 +120,7 @@ static void loop(void) {
 		} else {
 			execute(name);
 		}
-		free(name);
+		//free(name);
 
 	}
 
@@ -548,6 +552,7 @@ static void rmdir(struct _cmd *c) {
 	ffatal(!status, "Error when removing the ifile %d", inumber);
 }
 
+
 int main(int argc, char **argv) {
 	/* Verification du disque et du MBR */
 	init_master();
@@ -556,7 +561,9 @@ int main(int argc, char **argv) {
 	load_file_system_root();
 	/* dialog with user */
 
-	create_ctx(STACK_WIDTH, loop, NULL );
+    create_ctx(STACK_WIDTH, loop,NULL );
+
+    create_ctx(STACK_WIDTH, loop, NULL );
     //loop();
 
 	/*
