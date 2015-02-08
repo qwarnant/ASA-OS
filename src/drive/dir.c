@@ -68,13 +68,13 @@ static int find_entry(file_desc_t *fd, const char *basename) {
 
 int init_file_system() {
 	unsigned inumber = create_ifile(directory);
-	super.super_root = inumber;
+	current_super.super_root = inumber;
 	CURRENT_DIRECTORY[0] = '/';
 }
 
 void load_file_system_root() {
 	strcpy(CURRENT_DIRECTORY, "/");
-	super.super_root = FILE_SYSTEM_ROOT;
+    current_super.super_root = FILE_SYSTEM_ROOT;
 }
 
 /*------------------------------
@@ -205,7 +205,7 @@ unsigned int inumber_of_path(const char *pathname) {
 	 return 0;
 	 */
 	/* start at root */
-	icurrent = super.super_root;
+	icurrent = current_super.super_root;
 
 	while (*pathname) {
 		if (*pathname != '/') {

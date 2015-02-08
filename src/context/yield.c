@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <tools.h>
+#include <hardware.h>
 #include "yield.h"
 
 struct ctx_s * current_ctx = NULL;
@@ -125,7 +126,7 @@ int create_ctx(int stack_size, funct_t f, void* args) {
 
 void yield() {
 
-	_out(TIMER_ALARM, 0xffffffff - 20);
+	_out(TIMER_ALARM, 0xffffffff - 2000);
 
 
 	if (current_ctx != NULL ) {

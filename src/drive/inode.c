@@ -117,10 +117,13 @@ void write_inode(unsigned int inumber, struct inode_s *inode)
 unsigned int create_inode(enum file_type_e type)
 {
     unsigned int inumber;
-    struct inode_s inode;
+    struct inode_s inode;    printf("test3\n");
+
     memset(&inode, 0, sizeof(struct inode_s));
     inode.ind_type = type;
+
     inumber = new_bloc();
+
     if(!inumber) /*disque plein*/
         printf("Disque plein\n");
     else

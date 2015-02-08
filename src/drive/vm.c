@@ -96,32 +96,27 @@ static void execute(const char *name) {
 }
 
 static void loop(void) {
-
+    char name[64];
 	char temp[64];
     int status;
-int stop =0;
 
-char * test;
-	while (!stop){
+	while (printf("%s> ", CURRENT_DIRECTORY), scanf("%62s", name) == 1){
+        printf("val : %s\n",name);
 
-		//printf("%s> ", CURRENT_DIRECTORY);
-		test = readline(">");
-        printf("val : %s\n",test);
-
-		if (test[0] == '&') {
-			strncpy(temp, test + 1, strlen(test));
+		if (name[0] == '&') {
+			strncpy(temp, name + 1, strlen(63));
 			status = create_ctx(STACK_WIDTH, execute, temp);
 
             if(status == RETURN_FAILURE) {
-                fprintf(stderr, "Failed to create context : %s\n", test);
+                fprintf(stderr, "Failed to create context : %s\n", name);
                 return;
             }
 
 			printf("%s %d\n", temp, status);
 		} else {
-			execute(test);
+			execute(name);
 		}
-		free(test);
+		free(name);
 
 	}
 
@@ -131,7 +126,7 @@ char * test;
 static void compute(struct _cmd *c) {
 	long i;
 	long j;
-	for (i = 0; i < 10000000; i++) {
+	for (i = 0; i < 10000; i++) {
 		pow(i, j);
 		j++;
 		j %= 1000;
@@ -224,8 +219,13 @@ static void mknfs(struct _cmd *c) {
 			init_super(current_vol);
 		}
 
+        printf("Initialize the file system... \n");
+
 		init_file_system();
-		save_super();
+
+        printf("Save the file system... \n");
+
+        save_super();
 
 	} else
 		printf("Impossible de creer un systeme de fichier pour"
@@ -556,8 +556,8 @@ int main(int argc, char **argv) {
 	load_file_system_root();
 	/* dialog with user */
 
-	//create_ctx(STACK_WIDTH, loop, NULL );
-loop();
+	create_ctx(STACK_WIDTH, loop, NULL );
+    //loop();
 
 	/*
 	 * init

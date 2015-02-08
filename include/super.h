@@ -13,14 +13,18 @@
 /* the index of a bloc full of zeroes */
 #define BLOC_NULL	0
 
-struct super_s {
-    unsigned int super_magic; /* SUPER_MAGIC */
-    unsigned int super_root; 
-    unsigned int super_free_size; /* number of blocs */
-    unsigned int super_first_free;
+struct super_bloc_s {
+    unsigned int super_magic, super_first_free_bloc, super_n_free;
+    char name[32];
+    int id;
+    unsigned super_root;
 };
 
-struct super_s super;
+struct free_bloc_s {
+    unsigned int fb_n_free, fb_next;  /* 0 = pas de suivant */
+};
+
+static struct super_bloc_s current_super;
 unsigned int current_volume; 
 
 void init_super(unsigned int vol);

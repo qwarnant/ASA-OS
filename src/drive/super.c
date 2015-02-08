@@ -9,18 +9,6 @@
 #define MAGIC 0x0000DEAD
 #define SUPER 0
 
-struct free_bloc_s {
-    unsigned int fb_n_free, fb_next;  /* 0 = pas de suivant */
-};
-
-struct super_bloc_s {
-    unsigned int super_magic, super_first_free_bloc, super_n_free;
-    char name[32];
-    int id;
-};
-
-static struct super_bloc_s current_super;
-
 void init_super(unsigned int volume)
 {
     if(mbr.mbr_vol[volume].vol_n_bloc > 1 && volume < mbr.mbr_n_vol) {
@@ -70,7 +58,6 @@ unsigned int new_bloc()
     unsigned int bloc, result;
     struct free_bloc_s fb;
     result = bloc = current_super.super_first_free_bloc;
-printf("current : %s\n",current_super.super_n_free);
     if(bloc!=0 && current_super.super_n_free>0) {
         read_bloc_n(current_volume, bloc, (unsigned char *)&fb,
                     sizeof(struct free_bloc_s));
