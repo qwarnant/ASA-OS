@@ -51,7 +51,7 @@ int create_ctx(int, funct_t, void*);
 	search the next unblocked context in the ring in order to execute it.
  */
 void yield();
-
+void yield_hw();
 /*
 	init_ctx()
 	This method initializes a new context with a specified execution stack

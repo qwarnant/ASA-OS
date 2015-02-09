@@ -11,7 +11,7 @@
 void irq_disable() {
    // printf("irq disable\n");
 
-	_mask(15);
+	_mask(13);
 }
 
 void irq_enable() {

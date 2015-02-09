@@ -90,7 +90,6 @@ static struct _cmd commands[] =
 static void execute(const char *name) {
 	struct _cmd *c = commands;
 
-	printf("%s\n", name);
 	while (c->name && strcmp(name, c->name))
 		c++;
 	(*c->fun)(c);
@@ -115,16 +114,16 @@ static void loop(void) {
 				return;
 			}
 
-			printf("%s %d\n", temp, status);
 		} else {
 			execute(name);
 		}
 		//free(name);
 		memset(name, '\0', sizeof(name));
 
+
 	}
 
-	printf("finished\n");
+	printf("loop finished\n");
 }
 
 static void compute(struct _cmd *c) {

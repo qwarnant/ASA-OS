@@ -15,7 +15,8 @@ void read_sector(unsigned int c, unsigned int s, unsigned char *buffer)
         goto_sector(c,s);
         _out(HDA_DATAREGS,1);
         _out(HDA_CMDREG,CMD_READ);
-        _sleep(HDA_IRQ); /* attente de HDA_IRQ */
+        //_sleep(HDA_IRQ); /* attente de HDA_IRQ */
+        yield_hw();
         memcpy(buffer, MASTERBUFFER, HDA_SECTORSIZE);
     }
 }
@@ -27,8 +28,8 @@ void read_sector_n(unsigned int c, unsigned int s, unsigned char *buffer,
         goto_sector(c,s);
         _out(HDA_DATAREGS,1);
         _out(HDA_CMDREG,CMD_READ);
-        _sleep(HDA_IRQ); /* attente de HDA_IRQ */
-       // yield();
+        //_sleep(HDA_IRQ); /* attente de HDA_IRQ */
+        yield_hw();
         memcpy(buffer, MASTERBUFFER, n < HDA_SECTORSIZE ? n : HDA_SECTORSIZE);
     }
 }
@@ -39,8 +40,9 @@ void write_sector(unsigned int c, unsigned int s, unsigned char *buffer)
         memcpy(MASTERBUFFER, buffer, HDA_SECTORSIZE);
         goto_sector(c,s);
         _out(HDA_CMDREG,CMD_WRITE);
-        _sleep(HDA_IRQ); /* attente de HDA_IRQ */
-      //  yield();
+      //  _sleep(HDA_IRQ); /* attente de HDA_IRQ */
+        yield_hw();
+        //  yield();
     }
 }
 
@@ -51,8 +53,9 @@ void write_sector_n(unsigned int c, unsigned int s, unsigned char *buffer,
         memcpy(MASTERBUFFER, buffer, n < HDA_SECTORSIZE ? n : HDA_SECTORSIZE);
         goto_sector(c,s);
         _out(HDA_CMDREG, CMD_WRITE);
-       _sleep(HDA_IRQ); /* attente de HDA_IRQ */
-       // yield();
+      // _sleep(HDA_IRQ); /* attente de HDA_IRQ */
+        yield_hw();
+        // yield();
     }
 }
 
@@ -72,7 +75,8 @@ void format_sector(unsigned int c, unsigned int s, unsigned int nsector,
 
         _out(HDA_CMDREG, CMD_FORMAT);
       //  yield();
-        _sleep(HDA_IRQ); /* attente de HDA_IRQ */
+        yield_hw();
+        //_sleep(HDA_IRQ); /* attente de HDA_IRQ */
     }
 }
 
@@ -85,7 +89,8 @@ void goto_sector(unsigned int c, unsigned int s)
     _out(HDA_DATAREGS+2, (s>>8) & 0xFF);
     _out(HDA_DATAREGS+3, s&0xFF);
     _out(HDA_CMDREG, CMD_SEEK);
-    _sleep(HDA_IRQ); /* attente de HDA_IRQ */
+    // _sleep(HDA_IRQ); /* attente de HDA_IRQ */
+    yield_hw();
 
     //yield();
 
@@ -119,6 +124,8 @@ void init_master() {
     _out(TIMER_PARAM,128+64); /* reset + alarm on */
 
     IRQVECTOR[TIMER_IRQ] = yield;
+    IRQVECTOR[HDA_IRQ] = yield_hw;
+
 
     irq_enable();
 }

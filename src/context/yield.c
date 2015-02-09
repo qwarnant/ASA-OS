@@ -31,8 +31,8 @@ int init_ctx(struct ctx_s * ctx, size_t stack_size, funct_t f, void * arg) {
 	ctx->ctx_arg = arg;
 	ctx->ctx_state = CTX_INIT;
 	ctx->ctx_magic = CTX_MAGIC;
-    ctx->ctx_start_time = (unsigned int) time(NULL);
-    ctx->ctx_exec_time = 0;
+	ctx->ctx_start_time = (unsigned int) time(NULL );
+	ctx->ctx_exec_time = 0;
 
 	return RETURN_SUCCESS;
 }
@@ -41,7 +41,6 @@ void switch_to_ctx(struct ctx_s * ctx) {
 	struct ctx_s *temp;
 	assert(ctx->ctx_magic == CTX_MAGIC);
 	irq_disable();
-
 
 	while (ctx->ctx_state == CTX_END || ctx->ctx_state == CTX_STOP) {
 		if (ctx_ring == ctx) {
@@ -68,13 +67,14 @@ void switch_to_ctx(struct ctx_s * ctx) {
 				:);
 
 		/* Put the new uptime in the structure */
-		current_ctx->ctx_exec_time += (((int) time(NULL)) - current_ctx_start_time);
+		current_ctx->ctx_exec_time += (((int) time(NULL ))
+				- current_ctx_start_time);
 	}
 
 	current_ctx = ctx;
 
 	/* Start the uptime */
-	current_ctx_start_time = (unsigned int) time(NULL);
+	current_ctx_start_time = (unsigned int) time(NULL );
 
 	asm ("movl %0, %%esp" "\n\t" "movl %1, %%ebp"
 			:
@@ -117,29 +117,36 @@ int create_ctx(int stack_size, funct_t f, void* args) {
 		new_ctx->ctx_next = ctx_ring->ctx_next;
 		ctx_ring->ctx_next = new_ctx;
 	}
-	if(init_ctx(new_ctx, (size_t) stack_size, f, args) == RETURN_FAILURE) {
-        return RETURN_FAILURE;
-    }
+	if (init_ctx(new_ctx, (size_t) stack_size, f, args) == RETURN_FAILURE) {
+		return RETURN_FAILURE;
+	}
 
 	return new_ctx->ctx_id;
+}
+
+void yield_hw() {
+
+	if (ctx_hda != NULL ) {
+
+		_mask(15);
+		struct ctx_s * next = ctx_hda;
+		ctx_hda = ctx_hda->ctx_next;
+		switch_to_ctx(next);
+		_mask(1);
+	} else {
+		ctx_hda = current_ctx;
+		yield();
+	}
 }
 
 void yield() {
 
 	_out(TIMER_ALARM, 0xffffffff - 2000);
 
+	if (ctx_ring == NULL )
+		return;
 
 	if (current_ctx != NULL ) {
-
-		/*if (ctx_hda != NULL ) {
-			struct ctx_s * next = ctx_hda;
-			ctx_hda = NULL;
-			switch_to_ctx(next);
-		}*/
-
-		/*	if(waiting == TRUE) {
-		 ctx_hda = current_ctx;
-		 } */
 
 		switch_to_ctx(current_ctx->ctx_next);
 
@@ -150,20 +157,18 @@ void yield() {
 		switch_to_ctx(ctx_ring);
 	}
 
-
-
 }
 
 void get_state_name(enum ctx_state_e state, char* string) {
-    if(state == CTX_INIT) {
-        strcpy(string, "INIT");
-    } else if(state == CTX_EXE) {
-        strcpy(string, "EXE");
-    } else if(state == CTX_STOP) {
-        strcpy(string, "STOP");
-    } else if(state == CTX_END){
-        strcpy(string, "END");
-    }  else {
-        strcpy(string, "UNK");
-    }
+	if (state == CTX_INIT) {
+		strcpy(string, "INIT");
+	} else if (state == CTX_EXE) {
+		strcpy(string, "EXE");
+	} else if (state == CTX_STOP) {
+		strcpy(string, "STOP");
+	} else if (state == CTX_END) {
+		strcpy(string, "END");
+	} else {
+		strcpy(string, "UNK");
+	}
 }
