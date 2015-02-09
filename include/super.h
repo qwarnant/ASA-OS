@@ -24,7 +24,7 @@ struct free_bloc_s {
     unsigned int fb_n_free, fb_next;  /* 0 = pas de suivant */
 };
 
-static struct super_bloc_s current_super;
+extern struct super_bloc_s current_super;
 unsigned int current_volume; 
 
 void init_super(unsigned int vol);

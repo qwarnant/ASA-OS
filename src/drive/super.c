@@ -9,6 +9,8 @@
 #define MAGIC 0x0000DEAD
 #define SUPER 0
 
+struct super_bloc_s current_super;
+
 void init_super(unsigned int volume)
 {
     if(mbr.mbr_vol[volume].vol_n_bloc > 1 && volume < mbr.mbr_n_vol) {
