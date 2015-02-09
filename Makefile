@@ -3,7 +3,7 @@ LINK 	= gcc
 CFLAGS  = -m32 -Wall -g 
 INCPATH	= -I. -I$(IDIR)
 LDFLAGS = -m32
-LIBS	= -lhardware -lm -lreadline 
+LIBS	= -lhardware -lm 
 RM      = rm -f
 
 BIN	= dmps frmt mkvol dvol rmvol vm mknfs dfs test

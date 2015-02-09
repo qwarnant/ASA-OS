@@ -5,6 +5,9 @@
 #include "drive.h"
 #include "hardware.h"
 #include "yield.h"
+#include "sem.h"
+
+struct sem_s sem_drive;
 
 static void goto_sector(unsigned int c, unsigned int s);
 static void empty_it() {return;}
@@ -12,12 +15,15 @@ static void empty_it() {return;}
 void read_sector(unsigned int c, unsigned int s, unsigned char *buffer)
 {
     if(check_cs(c,s)) {
+    	sem_down(&sem_drive);
         goto_sector(c,s);
         _out(HDA_DATAREGS,1);
         _out(HDA_CMDREG,CMD_READ);
         //_sleep(HDA_IRQ); /* attente de HDA_IRQ */
-        yield_hw();
+
         memcpy(buffer, MASTERBUFFER, HDA_SECTORSIZE);
+        sem_up(&sem_drive);
+        yield_hw();
     }
 }
 
@@ -25,24 +31,30 @@ void read_sector_n(unsigned int c, unsigned int s, unsigned char *buffer,
                    unsigned int n)
 {
     if(check_cs(c,s)) {
+    	sem_down(&sem_drive);
         goto_sector(c,s);
         _out(HDA_DATAREGS,1);
         _out(HDA_CMDREG,CMD_READ);
         //_sleep(HDA_IRQ); /* attente de HDA_IRQ */
-        yield_hw();
+
         memcpy(buffer, MASTERBUFFER, n < HDA_SECTORSIZE ? n : HDA_SECTORSIZE);
+        sem_up(&sem_drive);
+        yield_hw();
     }
 }
 
 void write_sector(unsigned int c, unsigned int s, unsigned char *buffer)
 {
     if(check_cs(c,s)) {
+    	sem_down(&sem_drive);
         memcpy(MASTERBUFFER, buffer, HDA_SECTORSIZE);
         goto_sector(c,s);
         _out(HDA_CMDREG,CMD_WRITE);
       //  _sleep(HDA_IRQ); /* attente de HDA_IRQ */
-        yield_hw();
+
         //  yield();
+        sem_up(&sem_drive);
+        yield_hw();
     }
 }
 
@@ -50,10 +62,12 @@ void write_sector_n(unsigned int c, unsigned int s, unsigned char *buffer,
                     unsigned int n)
 {
     if(check_cs(c,s)) {
+    	sem_down(&sem_drive);
         memcpy(MASTERBUFFER, buffer, n < HDA_SECTORSIZE ? n : HDA_SECTORSIZE);
         goto_sector(c,s);
         _out(HDA_CMDREG, CMD_WRITE);
       // _sleep(HDA_IRQ); /* attente de HDA_IRQ */
+        sem_up(&sem_drive);
         yield_hw();
         // yield();
     }
@@ -63,6 +77,7 @@ void format_sector(unsigned int c, unsigned int s, unsigned int nsector,
                    unsigned int value)
 {
     if(check_cs(c,s)) {
+
         nsector = nsector > HDA_SECTORSIZE ? HDA_SECTORSIZE : nsector;
         goto_sector(c,s);
         _out(HDA_DATAREGS, (nsector >> 8) & 0xFF);
@@ -110,6 +125,9 @@ void init_master() {
         exit(EXIT_FAILURE);
     }
 
+
+    //sem init
+    sem_init(&sem_drive,1);
 
 
     /* disallows all IT */

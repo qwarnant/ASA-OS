@@ -124,6 +124,24 @@ int create_ctx(int stack_size, funct_t f, void* args) {
 	return new_ctx->ctx_id;
 }
 
+
+
+/*
+ * TODO
+ *
+ *
+ * Modifier le yield hw, retirer le code et proteger les acces disque par des semaphores (write et read + init sem)
+ * retirer du ring le ctx_hda, au moment où on le transfere (else)
+ *
+ * process idle while true yield, avant le create ctx loop
+ *
+ *
+ * garder 20 ms
+ *
+ *
+ */
+
+
 void yield_hw() {
 
 	if (ctx_hda != NULL ) {
@@ -141,7 +159,7 @@ void yield_hw() {
 
 void yield() {
 
-	_out(TIMER_ALARM, 0xffffffff - 2000);
+	_out(TIMER_ALARM, 0xffffffff - 20);
 
 	if (ctx_ring == NULL )
 		return;

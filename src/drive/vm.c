@@ -95,6 +95,13 @@ static void execute(const char *name) {
 	(*c->fun)(c);
 }
 
+static void idle(void) {
+	int stop = 0;
+	while (!stop) {
+		yield();
+	}
+}
+
 static void loop(void) {
 	char name[64];
 	char temp[64];
@@ -119,7 +126,6 @@ static void loop(void) {
 		}
 		//free(name);
 		memset(name, '\0', sizeof(name));
-
 
 	}
 
@@ -561,7 +567,7 @@ int main(int argc, char **argv) {
 	/* dialog with user */
 
 	//create_ctx(STACK_WIDTH, none, NULL );
-
+	create_ctx(STACK_WIDTH, idle, NULL );
 	create_ctx(STACK_WIDTH, loop, NULL );
 	//loop();
 
