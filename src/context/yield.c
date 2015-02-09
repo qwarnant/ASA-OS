@@ -23,8 +23,8 @@ int init_ctx(struct ctx_s * ctx, size_t stack_size, funct_t f, void * arg) {
 	if (ctx->ctx_stack == NULL )
 		return RETURN_FAILURE;
 
-	ctx->ctx_ebp = ctx->ctx_esp = ((char*) ctx->ctx_stack)
-			+ stack_size- STACK_WIDTH;
+	ctx->ctx_ebp = ((char*) ctx->ctx_stack);
+	ctx->ctx_esp = ctx->ctx_ebp + stack_size;
 
 	ctx->ctx_id = cpt_index++;
 	ctx->ctx_f = f;

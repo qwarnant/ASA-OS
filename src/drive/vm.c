@@ -53,7 +53,7 @@ static struct _cmd commands[] =
 				"create a new partition" },
 				{ "del", del, "delete a partition" },
 				{ "compute", compute, "" },
-                { "top", top, "display all process" },
+				{ "top", top, "display all process" },
 				/* Directory management */
 				{ "ls", ls, "listing the current directory" }, { "cd", cd,
 						"change the current directory" }, { "mkdir", mkdir,
@@ -90,37 +90,37 @@ static struct _cmd commands[] =
 static void execute(const char *name) {
 	struct _cmd *c = commands;
 
-    printf("%s\n", name);
+	printf("%s\n", name);
 	while (c->name && strcmp(name, c->name))
 		c++;
 	(*c->fun)(c);
 }
 
 static void loop(void) {
-    char name[64];
+	char name[64];
 	char temp[64];
-    int status;
+	int status;
 
-    memset(name, '\0', sizeof(name));
-    memset(temp, '\0', sizeof(temp));
+	memset(name, '\0', sizeof(name));
+	memset(temp, '\0', sizeof(temp));
 // avant la boucle
-	while (printf("%s> ", CURRENT_DIRECTORY), scanf("%62s", name) == 1){
-        printf("val : %s\n",name);
+	while (printf("%s> ", CURRENT_DIRECTORY), scanf("%62s", name) == 1) {
 
 		if (name[0] == '&') {
-			strncpy(temp, name + 1, strlen(name)-1);
+			strncpy(temp, name + 1, strlen(name) - 1);
 			status = create_ctx(STACK_WIDTH, execute, temp);
 
-            if(status == RETURN_FAILURE) {
-                fprintf(stderr, "Failed to create context : %s\n", name);
-                return;
-            }
+			if (status == RETURN_FAILURE) {
+				fprintf(stderr, "Failed to create context : %s\n", name);
+				return;
+			}
 
 			printf("%s %d\n", temp, status);
 		} else {
 			execute(name);
 		}
 		//free(name);
+		memset(name, '\0', sizeof(name));
 
 	}
 
@@ -146,15 +146,16 @@ static void list(struct _cmd *c) {
 }
 
 static void top(struct _cmd *c) {
-    struct ctx_s tmp = *ctx_ring;
-    char state_name[4];
-    printf("PID\tEBP\t\tESP\t\tSTATE\t\tSTART\t\tUPTIME\n");
-    do {
-        get_state_name(tmp.ctx_state, state_name);
-        printf("%d\t%p\t%p\t%s\t\t%d\t%d\n", tmp.ctx_id, tmp.ctx_ebp, tmp.ctx_esp, state_name, tmp.ctx_start_time, tmp.ctx_exec_time);
+	struct ctx_s tmp = *ctx_ring;
+	char state_name[4];
+	printf("PID\tEBP\t\tESP\t\tSTATE\t\tSTART\t\tUPTIME\n");
+	do {
+		get_state_name(tmp.ctx_state, state_name);
+		printf("%d\t%p\t%p\t%s\t\t%d\t%d\n", tmp.ctx_id, tmp.ctx_ebp,
+				tmp.ctx_esp, state_name, tmp.ctx_start_time, tmp.ctx_exec_time);
 
-        tmp = *tmp.ctx_next;
-    } while(tmp.ctx_id != ctx_ring->ctx_id);
+		tmp = *tmp.ctx_next;
+	} while (tmp.ctx_id != ctx_ring->ctx_id);
 }
 
 static void new(struct _cmd *c) {
@@ -223,13 +224,13 @@ static void mknfs(struct _cmd *c) {
 			init_super(current_vol);
 		}
 
-        printf("Initialize the file system... \n");
+		printf("Initialize the file system... \n");
 
 		init_file_system();
 
-        printf("Save the file system... \n");
+		printf("Save the file system... \n");
 
-        save_super();
+		save_super();
 
 	} else
 		printf("Impossible de creer un systeme de fichier pour"
@@ -298,7 +299,7 @@ static void help(struct _cmd *dummy) {
 }
 
 static void none(struct _cmd *c) {
-	printf("%s\n", c->comment);
+	return;
 }
 
 /* dump buffer to stdout,
@@ -552,7 +553,6 @@ static void rmdir(struct _cmd *c) {
 	ffatal(!status, "Error when removing the ifile %d", inumber);
 }
 
-
 int main(int argc, char **argv) {
 	/* Verification du disque et du MBR */
 	init_master();
@@ -561,10 +561,10 @@ int main(int argc, char **argv) {
 	load_file_system_root();
 	/* dialog with user */
 
-    create_ctx(STACK_WIDTH, loop,NULL );
+	//create_ctx(STACK_WIDTH, none, NULL );
 
-    create_ctx(STACK_WIDTH, loop, NULL );
-    //loop();
+	create_ctx(STACK_WIDTH, loop, NULL );
+	//loop();
 
 	/*
 	 * init
