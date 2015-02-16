@@ -56,9 +56,7 @@ static struct _cmd commands[] =
 				{ "top", top, "display all process" },
 				/* Directory management */
 				{ "ls", ls, "listing the current directory" }, { "cd", cd,
-						"change the current directory" }, { "mkdir", mkdir,
-						"create a new directory" }, { "rmdir", rmdir,
-						"delete a directory" },
+						"change the current directory" },
 				{ "cd", cd,
 						"change the current directory to the specified directory" },
 				{ "mkdir", mkdir,
@@ -135,7 +133,7 @@ static void loop(void) {
 static void compute(struct _cmd *c) {
 	long i;
 	long j;
-	for (i = 0; i < 10000; i++) {
+	for (i = 0; i < 10000000; i++) {
 		pow(i, j);
 		j++;
 		j %= 1000;

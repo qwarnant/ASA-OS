@@ -29,7 +29,7 @@ DEPS 	= $(wildcard $(IDIR)/*.h)
 
 BINARIES= $(addprefix $(BINDIR)/,$(BIN))
 OBJECTS = $(addprefix $(ODIR)/,\
-		inode.o drive.o mbr.o super.o tools.o ifile.o dir.o hw.o yield.o)
+		inode.o drive.o mbr.o super.o tools.o ifile.o dir.o hw.o yield.o sem.o)
 
 all :   $(OBJ) $(BINARIES)
 

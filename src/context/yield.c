@@ -133,7 +133,7 @@ int create_ctx(int stack_size, funct_t f, void* args) {
  * Modifier le yield hw, retirer le code et proteger les acces disque par des semaphores (write et read + init sem)
  * retirer du ring le ctx_hda, au moment où on le transfere (else)
  *
- * process idle while true yield, avant le create ctx loop
+ *
  *
  *
  * garder 20 ms
