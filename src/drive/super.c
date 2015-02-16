@@ -147,7 +147,7 @@ void display_filesystem()
         vol_n_bloc = vol->vol_n_bloc;
         nb_bloc_size = vol_n_bloc*HDA_SECTORSIZE;
 
-        if(!load_super(i)) { //warning : modify the current volume var
+        if(load_super(i)) { //warning : modify the current volume var
             present = 1;
             dispo = current_super.super_n_free*HDA_SECTORSIZE;
             util = nb_bloc_size - dispo;
@@ -165,5 +165,6 @@ void display_filesystem()
     }
 
     current_volume = current_volume_temp; //restore
+    load_super(current_volume);
 
 }

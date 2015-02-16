@@ -352,7 +352,7 @@ static void cd(struct _cmd *c) {
 	int status;
 	char pathname[ENTRYMAXLENGTH];
 
-	if (load_super(current_volume)) {
+	if (!load_super(current_volume)) {
 		fprintf(stderr, "No filesystem on the current partition.\n");
 		return;
 	}
@@ -422,7 +422,7 @@ static void ls(struct _cmd *c) {
 	unsigned int ientry = 0, inumber = 0; /* the entry index */
 	int status;
 
-	if (load_super(current_volume)) {
+	if (!load_super(current_volume)) {
 		fprintf(stderr, "No filesystem on the current partition.\n");
 		return;
 	}
@@ -452,7 +452,7 @@ static void cat(struct _cmd *c) {
 	unsigned inumber;
 	char pathname[ENTRYMAXLENGTH];
 
-	if (load_super(current_volume)) {
+	if (!load_super(current_volume)) {
 		fprintf(stderr, "No filesystem on the current partition.\n");
 		return;
 	}
@@ -475,7 +475,7 @@ static void mkdir(struct _cmd *c) {
 	char dirname[ENTRYMAXLENGTH];
 	int status;
 
-	if (load_super(current_volume)) {
+	if (!load_super(current_volume)) {
 		fprintf(stderr, "No filesystem on the current partition.\n");
 		return;
 	}
@@ -497,7 +497,7 @@ static void touch(struct _cmd *c) {
 	int car;
 	char pathname[ENTRYMAXLENGTH];
 
-	if (load_super(current_volume)) {
+	if (!load_super(current_volume)) {
 		fprintf(stderr, "No filesystem on the current partition.\n");
 		return;
 	}
@@ -537,7 +537,7 @@ static void rmdir(struct _cmd *c) {
 	int status;
 	char dirname[ENTRYMAXLENGTH];
 
-	if (load_super(current_volume)) {
+	if (!load_super(current_volume)) {
 		fprintf(stderr, "No filesystem on the current partition.\n");
 		return;
 	}
